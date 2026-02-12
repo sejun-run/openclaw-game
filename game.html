@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>서버 디펜스 - 인프라 카드게임</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #eee;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding: 20px 0;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      background: linear-gradient(90deg, #00d9ff, #00ff88);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    .subtitle { color: #888; font-size: 1.1em; }
+
+    /* 탭 네비게이션 */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    .tab-btn {
+      padding: 12px 30px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 25px;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1em;
+    }
+
+    .tab-btn:hover, .tab-btn.active {
+      background: linear-gradient(90deg, #00d9ff, #00ff88);
+      color: #000;
+      border-color: transparent;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* 카드 그리드 */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    /* 카드 스타일 */
+    .card {
+      background: linear-gradient(145deg, #2a2a4a, #1a1a2e);
+      border-radius: 15px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+    }
+
+    .card.computing { border-color: #ff6b6b; }
+    .card.storage { border-color: #ffd93d; }
+    .card.database { border-color: #6bcb77; }
+    .card.network { border-color: #4d96ff; }
+    .card.security { border-color: #9b59b6; }
+    .card.devops { border-color: #ff9f43; }
+    .card.monitoring { border-color: #00cec9; }
+    .card.attack { border-color: #e74c3c; }
+
+    .card-icon {
+      font-size: 2.5em;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .card-name {
+      font-weight: bold;
+      font-size: 1.1em;
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    .card-type {
+      font-size: 0.75em;
+      text-align: center;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .card-stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #00d9ff;
+    }
+
+    .stat-label {
+      font-size: 0.7em;
+      color: #666;
+    }
+
+    /* 카테고리 필터 */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      color: #aaa;
+      cursor: pointer;
+      font-size: 0.85em;
+      transition: all 0.3s;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+    }
+
+    /* 모달 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: linear-gradient(145deg, #2a2a4a, #1a1a2e);
+      border-radius: 20px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-header {
+      padding: 30px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .modal-icon {
+      font-size: 4em;
+      margin-bottom: 15px;
+    }
+
+    .modal-name {
+      font-size: 1.8em;
+      margin-bottom: 5px;
+    }
+
+    .modal-category {
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.85em;
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    .modal-section {
+      margin-bottom: 25px;
+    }
+
+    .modal-section h3 {
+      color: #00d9ff;
+      margin-bottom: 10px;
+      font-size: 1em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .modal-section p {
+      color: #ccc;
+      line-height: 1.7;
+    }
+
+    .modal-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .modal-stat {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .modal-stat-value {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #00ff88;
+    }
+
+    .modal-stat-label {
+      font-size: 0.75em;
+      color: #888;
+      margin-top: 5px;
+    }
+
+    .services-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .service-tag {
+      background: rgba(255,255,255,0.1);
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 0.85em;
+    }
+
+    .service-tag.aws { border-left: 3px solid #ff9900; }
+    .service-tag.gcp { border-left: 3px solid #4285f4; }
+    .service-tag.azure { border-left: 3px solid #0089d6; }
+
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      color: #888;
+      font-size: 1.5em;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .close-btn:hover { color: #fff; }
+
+    .tip-box {
+      background: rgba(0, 217, 255, 0.1);
+      border-left: 3px solid #00d9ff;
+      padding: 15px;
+      border-radius: 0 10px 10px 0;
+      margin-top: 15px;
+    }
+
+    .tip-box strong {
+      color: #00d9ff;
+    }
+
+    /* 게임 화면 */
+    .game-board {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 20px;
+      min-height: 70vh;
+    }
+
+    .opponent-area, .player-area {
+      background: rgba(0,0,0,0.2);
+      border-radius: 15px;
+      padding: 20px;
+    }
+
+    .area-label {
+      font-size: 0.85em;
+      color: #888;
+      margin-bottom: 10px;
+    }
+
+    .health-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .health-bar-bg {
+      flex: 1;
+      height: 20px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .health-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #e74c3c, #27ae60);
+      transition: width 0.5s;
+    }
+
+    .health-text {
+      font-weight: bold;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .field-cards {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      min-height: 100px;
+    }
+
+    .field-card {
+      width: 80px;
+      height: 100px;
+      background: linear-gradient(145deg, #3a3a5a, #2a2a4a);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8em;
+    }
+
+    .field-card-icon { font-size: 1.5em; }
+
+    .battle-area {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .turn-info {
+      background: rgba(0, 217, 255, 0.2);
+      padding: 15px 30px;
+      border-radius: 25px;
+      font-size: 1.2em;
+    }
+
+    .hand-cards {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .hand-card {
+      width: 100px;
+      height: 140px;
+      background: linear-gradient(145deg, #3a3a5a, #2a2a4a);
+      border-radius: 10px;
+      padding: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+
+    .hand-card:hover {
+      transform: translateY(-10px);
+      border-color: #00d9ff;
+    }
+
+    .hand-card-icon { font-size: 1.8em; text-align: center; }
+    .hand-card-name { font-size: 0.7em; text-align: center; margin-top: 5px; }
+    .hand-card-cost {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: #00d9ff;
+      color: #000;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.8em;
+    }
+
+    .game-controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .game-btn {
+      padding: 12px 30px;
+      background: linear-gradient(90deg, #00d9ff, #00ff88);
+      border: none;
+      border-radius: 25px;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .game-btn:hover { transform: scale(1.05); }
+    .game-btn.secondary {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+
+    /* 시작 화면 */
+    .start-screen {
+      text-align: center;
+      padding: 50px 20px;
+    }
+
+    .start-screen h2 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    .start-screen p {
+      color: #888;
+      margin-bottom: 30px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .coming-soon {
+      background: rgba(255, 159, 67, 0.2);
+      border: 1px dashed #ff9f43;
+      padding: 30px;
+      border-radius: 15px;
+      margin-top: 30px;
+    }
+
+    .coming-soon h3 {
+      color: #ff9f43;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🃏 서버 디펜스</h1>
+      <p class="subtitle">인프라 카드게임으로 배우는 클라우드 아키텍처</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="collection">📚 카드 도감</button>
+      <button class="tab-btn" data-tab="game">🎮 게임하기</button>
+      <button class="tab-btn" data-tab="learn">📖 학습하기</button>
+    </div>
+
+    <!-- 카드 도감 -->
+    <div id="collection" class="tab-content active">
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">전체</button>
+        <button class="filter-btn" data-filter="computing">🖥️ 컴퓨팅</button>
+        <button class="filter-btn" data-filter="storage">💾 스토리지</button>
+        <button class="filter-btn" data-filter="database">🗄️ 데이터베이스</button>
+        <button class="filter-btn" data-filter="network">🌐 네트워크</button>
+        <button class="filter-btn" data-filter="security">🔒 보안</button>
+        <button class="filter-btn" data-filter="devops">⚙️ DevOps</button>
+        <button class="filter-btn" data-filter="monitoring">📊 모니터링</button>
+      </div>
+
+      <div class="card-grid" id="cardGrid"></div>
+    </div>
+
+    <!-- 게임 화면 -->
+    <div id="game" class="tab-content">
+      <div class="start-screen">
+        <h2>🚀 서버를 지켜라!</h2>
+        <p>인프라 카드로 덱을 구성하고, 상대의 공격으로부터 서버를 방어하세요. 
+           시너지를 활용해 강력한 아키텍처를 구축하면 승리!</p>
+        <button class="game-btn" onclick="startTutorial()">튜토리얼 시작</button>
+        
+        <div class="coming-soon">
+          <h3>🔜 Coming Soon</h3>
+          <p>싱글플레이 캠페인과 멀티플레이어 모드가 곧 추가됩니다!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 학습 화면 -->
+    <div id="learn" class="tab-content">
+      <div class="start-screen">
+        <h2>📖 아키텍처 패턴 학습</h2>
+        <p>실전에서 사용되는 인프라 패턴을 카드 조합으로 배워보세요.</p>
+        
+        <div class="coming-soon">
+          <h3>🔜 Coming Soon</h3>
+          <p>3-Tier, 마이크로서비스, 서버리스 등 다양한 아키텍처 패턴 가이드가 추가됩니다!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 카드 상세 모달 -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <button class="close-btn" onclick="closeModal()">✕</button>
+      <div class="modal-header">
+        <div class="modal-icon" id="modalIcon"></div>
+        <div class="modal-name" id="modalName"></div>
+        <div class="modal-category" id="modalCategory"></div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-stats" id="modalStats"></div>
+        
+        <div class="modal-section">
+          <h3>📋 설명</h3>
+          <p id="modalDesc"></p>
+        </div>
+
+        <div class="modal-section">
+          <h3>🎮 게임 효과</h3>
+          <p id="modalEffect"></p>
+        </div>
+
+        <div class="modal-section">
+          <h3>☁️ 실제 서비스</h3>
+          <div class="services-list" id="modalServices"></div>
+        </div>
+
+        <div class="modal-section">
+          <h3>💡 실전 팁</h3>
+          <div class="tip-box" id="modalTip"></div>
+        </div>
+
+        <div class="modal-section">
+          <h3>🔗 시너지 카드</h3>
+          <div class="services-list" id="modalSynergy"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 카드 데이터
+    const cards = [
+      // 컴퓨팅
+      {
+        id: 'ec2',
+        name: 'EC2',
+        icon: '🖥️',
+        category: 'computing',
+        categoryName: '컴퓨팅',
+        cost: 3,
+        hp: 100,
+        attack: 20,
+        description: '가상 서버(Virtual Machine)입니다. 클라우드에서 가장 기본적인 컴퓨팅 리소스로, 원하는 OS와 사양으로 서버를 빌릴 수 있습니다.',
+        effect: '기본 서버 카드. HP 100으로 안정적인 방어가 가능합니다.',
+        services: [
+          { name: 'AWS EC2', provider: 'aws' },
+          { name: 'GCP Compute Engine', provider: 'gcp' },
+          { name: 'Azure VM', provider: 'azure' }
+        ],
+        tip: '트래픽이 예측 가능하고 지속적인 워크로드에 적합합니다. 예약 인스턴스로 비용을 최대 72% 절감할 수 있어요.',
+        synergy: ['Load Balancer', 'Auto Scaling', 'EBS']
+      },
+      {
+        id: 'lambda',
+        name: 'Lambda',
+        icon: 'λ',
+        category: 'computing',
+        categoryName: '컴퓨팅',
+        cost: 2,
+        hp: 30,
+        attack: 40,
+        description: '서버리스 함수입니다. 서버 관리 없이 코드만 올리면 자동으로 실행됩니다. 사용한 만큼만 비용을 지불합니다.',
+        effect: 'HP는 낮지만 공격력이 높습니다. 빠른 응답이 필요할 때 유용.',
+        services: [
+          { name: 'AWS Lambda', provider: 'aws' },
+          { name: 'GCP Cloud Functions', provider: 'gcp' },
+          { name: 'Azure Functions', provider: 'azure' }
+        ],
+        tip: '콜드 스타트 지연이 있을 수 있어요. 짧은 실행 시간의 이벤트 기반 작업에 최적입니다.',
+        synergy: ['API Gateway', 'S3', 'DynamoDB']
+      },
+      {
+        id: 'container',
+        name: 'Container',
+        icon: '📦',
+        category: 'computing',
+        categoryName: '컴퓨팅',
+        cost: 2,
+        hp: 60,
+        attack: 25,
+        description: '앱과 환경을 패키징한 컨테이너입니다. Docker가 대표적이며, 어디서든 동일하게 실행됩니다.',
+        effect: '다른 컨테이너와 함께 배치하면 시너지 발동. 복제가 쉬움.',
+        services: [
+          { name: 'Docker', provider: 'aws' },
+          { name: 'AWS ECS', provider: 'aws' },
+          { name: 'GCP Cloud Run', provider: 'gcp' }
+        ],
+        tip: '"내 컴에서는 되는데?" 문제를 해결합니다. 개발-운영 환경 일치가 핵심!',
+        synergy: ['Kubernetes', 'Load Balancer', 'Registry']
+      },
+      {
+        id: 'kubernetes',
+        name: 'Kubernetes',
+        icon: '☸️',
+        category: 'computing',
+        categoryName: '컴퓨팅',
+        cost: 5,
+        hp: 150,
+        attack: 30,
+        description: '컨테이너 오케스트레이션 플랫폼입니다. 수백 개의 컨테이너를 자동으로 배포, 확장, 관리합니다.',
+        effect: 'Container 카드가 있으면 자동 복구 능력 부여. HP 소진 시 50% 확률로 부활.',
+        services: [
+          { name: 'AWS EKS', provider: 'aws' },
+          { name: 'GCP GKE', provider: 'gcp' },
+          { name: 'Azure AKS', provider: 'azure' }
+        ],
+        tip: '학습 곡선이 가파르지만, 대규모 서비스 운영의 표준입니다. Helm으로 패키지 관리하세요.',
+        synergy: ['Container', 'Service Mesh', 'Prometheus']
+      },
+
+      // 스토리지
+      {
+        id: 's3',
+        name: 'S3',
+        icon: '🪣',
+        category: 'storage',
+        categoryName: '스토리지',
+        cost: 2,
+        hp: 80,
+        attack: 0,
+        description: '오브젝트 스토리지입니다. 이미지, 동영상, 백업 파일 등 모든 종류의 파일을 무제한으로 저장합니다.',
+        effect: '공격력은 없지만, CDN과 시너지 시 정적 공격 무효화.',
+        services: [
+          { name: 'AWS S3', provider: 'aws' },
+          { name: 'GCP Cloud Storage', provider: 'gcp' },
+          { name: 'Azure Blob Storage', provider: 'azure' }
+        ],
+        tip: '정적 웹사이트 호스팅도 가능합니다. 버전 관리를 켜서 실수로 삭제해도 복구하세요.',
+        synergy: ['CDN', 'Lambda', 'Backup']
+      },
+      {
+        id: 'ebs',
+        name: 'Block Storage',
+        icon: '💿',
+        category: 'storage',
+        categoryName: '스토리지',
+        cost: 1,
+        hp: 40,
+        attack: 0,
+        description: '블록 스토리지입니다. EC2에 붙이는 가상 하드디스크로, 빠른 I/O가 필요한 데이터베이스에 적합합니다.',
+        effect: 'EC2와 함께 사용 시 HP +30 버프.',
+        services: [
+          { name: 'AWS EBS', provider: 'aws' },
+          { name: 'GCP Persistent Disk', provider: 'gcp' },
+          { name: 'Azure Managed Disk', provider: 'azure' }
+        ],
+        tip: 'SSD(gp3)와 HDD(st1) 타입이 있어요. 용도에 맞게 선택하면 비용 절감!',
+        synergy: ['EC2', 'Database', 'Snapshot']
+      },
+
+      // 데이터베이스
+      {
+        id: 'rds',
+        name: 'RDS',
+        icon: '🗄️',
+        category: 'database',
+        categoryName: '데이터베이스',
+        cost: 4,
+        hp: 120,
+        attack: 15,
+        description: '관리형 관계형 데이터베이스입니다. MySQL, PostgreSQL 등을 쉽게 운영할 수 있고, 백업/패치가 자동화됩니다.',
+        effect: '데이터 지속성 부여. 게임 오버 시에도 진행상황 저장.',
+        services: [
+          { name: 'AWS RDS', provider: 'aws' },
+          { name: 'GCP Cloud SQL', provider: 'gcp' },
+          { name: 'Azure SQL Database', provider: 'azure' }
+        ],
+        tip: 'Multi-AZ 배포로 고가용성을 확보하세요. Read Replica로 읽기 성능을 높일 수 있어요.',
+        synergy: ['Redis', 'Read Replica', 'Backup']
+      },
+      {
+        id: 'redis',
+        name: 'Redis',
+        icon: '⚡',
+        category: 'database',
+        categoryName: '데이터베이스',
+        cost: 3,
+        hp: 50,
+        attack: 35,
+        description: '인메모리 캐시/데이터베이스입니다. 디스크가 아닌 메모리에 저장해서 매우 빠릅니다. 세션, 캐시, 랭킹에 사용됩니다.',
+        effect: '다른 DB 카드 앞에 배치하면 받는 데미지 50% 감소.',
+        services: [
+          { name: 'AWS ElastiCache', provider: 'aws' },
+          { name: 'GCP Memorystore', provider: 'gcp' },
+          { name: 'Azure Cache for Redis', provider: 'azure' }
+        ],
+        tip: '캐시 전략(Cache-Aside, Write-Through)을 이해하면 효과적으로 활용할 수 있어요.',
+        synergy: ['RDS', 'API Gateway', 'Session']
+      },
+      {
+        id: 'dynamodb',
+        name: 'DynamoDB',
+        icon: '🔥',
+        category: 'database',
+        categoryName: '데이터베이스',
+        cost: 3,
+        hp: 80,
+        attack: 25,
+        description: 'NoSQL 데이터베이스입니다. 스키마 없이 유연하게 데이터를 저장하고, 자동 확장됩니다.',
+        effect: 'Lambda와 시너지 시 공격력 2배.',
+        services: [
+          { name: 'AWS DynamoDB', provider: 'aws' },
+          { name: 'GCP Firestore', provider: 'gcp' },
+          { name: 'Azure CosmosDB', provider: 'azure' }
+        ],
+        tip: '파티션 키 설계가 핵심! 핫 파티션을 피하도록 키를 분산하세요.',
+        synergy: ['Lambda', 'API Gateway', 'Stream']
+      },
+
+      // 네트워크
+      {
+        id: 'lb',
+        name: 'Load Balancer',
+        icon: '⚖️',
+        category: 'network',
+        categoryName: '네트워크',
+        cost: 3,
+        hp: 70,
+        attack: 10,
+        description: '트래픽 분산기입니다. 여러 서버에 요청을 골고루 나눠서 한 서버에 부하가 집중되는 것을 방지합니다.',
+        effect: '서버 카드 2개 이상 있을 때, 받는 데미지를 모든 서버에 분산.',
+        services: [
+          { name: 'AWS ALB/NLB', provider: 'aws' },
+          { name: 'GCP Load Balancer', provider: 'gcp' },
+          { name: 'Azure Load Balancer', provider: 'azure' }
+        ],
+        tip: 'ALB는 HTTP 레벨, NLB는 TCP 레벨. 웹서비스는 보통 ALB를 사용해요.',
+        synergy: ['EC2', 'Auto Scaling', 'Health Check']
+      },
+      {
+        id: 'cdn',
+        name: 'CDN',
+        icon: '🌍',
+        category: 'network',
+        categoryName: '네트워크',
+        cost: 2,
+        hp: 40,
+        attack: 0,
+        description: '콘텐츠 전송 네트워크입니다. 전 세계 엣지 서버에 콘텐츠를 캐싱해서 사용자와 가까운 곳에서 빠르게 전달합니다.',
+        effect: '정적 콘텐츠 공격(이미지, CSS, JS) 완전 무효화.',
+        services: [
+          { name: 'AWS CloudFront', provider: 'aws' },
+          { name: 'GCP Cloud CDN', provider: 'gcp' },
+          { name: 'Cloudflare', provider: 'azure' }
+        ],
+        tip: '글로벌 서비스라면 필수! TTL 설정으로 캐시 갱신 주기를 조절하세요.',
+        synergy: ['S3', 'WAF', 'SSL/TLS']
+      },
+      {
+        id: 'apigateway',
+        name: 'API Gateway',
+        icon: '🚪',
+        category: 'network',
+        categoryName: '네트워크',
+        cost: 2,
+        hp: 50,
+        attack: 15,
+        description: 'API 관문입니다. 인증, 속도 제한, 라우팅 등 API 요청을 중앙에서 관리합니다.',
+        effect: 'Rate Limit 효과 내장. 매턴 공격 횟수 1회 제한.',
+        services: [
+          { name: 'AWS API Gateway', provider: 'aws' },
+          { name: 'GCP API Gateway', provider: 'gcp' },
+          { name: 'Kong', provider: 'azure' }
+        ],
+        tip: 'Lambda와 조합하면 서버리스 API를 쉽게 만들 수 있어요.',
+        synergy: ['Lambda', 'Auth', 'Rate Limit']
+      },
+
+      // 보안
+      {
+        id: 'waf',
+        name: 'WAF',
+        icon: '🛡️',
+        category: 'security',
+        categoryName: '보안',
+        cost: 3,
+        hp: 60,
+        attack: 0,
+        description: '웹 애플리케이션 방화벽입니다. SQL Injection, XSS 등 웹 공격을 탐지하고 차단합니다.',
+        effect: 'SQL Injection, XSS 공격 카드 무효화.',
+        services: [
+          { name: 'AWS WAF', provider: 'aws' },
+          { name: 'GCP Cloud Armor', provider: 'gcp' },
+          { name: 'Azure WAF', provider: 'azure' }
+        ],
+        tip: 'OWASP Top 10 규칙을 기본으로 적용하세요. 커스텀 규칙으로 세밀한 제어 가능!',
+        synergy: ['CDN', 'Load Balancer', 'Firewall']
+      },
+      {
+        id: 'iam',
+        name: 'IAM',
+        icon: '🔑',
+        category: 'security',
+        categoryName: '보안',
+        cost: 1,
+        hp: 30,
+        attack: 0,
+        description: '접근 권한 관리입니다. 누가 어떤 리소스에 접근할 수 있는지 세밀하게 제어합니다.',
+        effect: '내부자 공격 데미지 70% 감소.',
+        services: [
+          { name: 'AWS IAM', provider: 'aws' },
+          { name: 'GCP IAM', provider: 'gcp' },
+          { name: 'Azure AD', provider: 'azure' }
+        ],
+        tip: '최소 권한 원칙! 필요한 권한만 부여하세요. 루트 계정은 MFA 필수!',
+        synergy: ['Secrets Manager', 'Audit', 'MFA']
+      },
+      {
+        id: 'ssl',
+        name: 'SSL/TLS',
+        icon: '🔐',
+        category: 'security',
+        categoryName: '보안',
+        cost: 1,
+        hp: 20,
+        attack: 0,
+        description: '암호화 통신입니다. 데이터가 전송되는 동안 암호화해서 도청을 방지합니다. HTTPS의 핵심.',
+        effect: '중간자 공격(MITM) 완전 무효화.',
+        services: [
+          { name: 'AWS ACM', provider: 'aws' },
+          { name: "Let's Encrypt", provider: 'gcp' },
+          { name: 'Cloudflare SSL', provider: 'azure' }
+        ],
+        tip: 'ACM으로 무료 SSL 인증서를 발급받을 수 있어요. 자동 갱신도 됩니다!',
+        synergy: ['Load Balancer', 'CDN', 'API Gateway']
+      },
+
+      // DevOps
+      {
+        id: 'cicd',
+        name: 'CI/CD',
+        icon: '🔄',
+        category: 'devops',
+        categoryName: 'DevOps',
+        cost: 2,
+        hp: 40,
+        attack: 20,
+        description: '지속적 통합/배포입니다. 코드 변경 시 자동으로 테스트하고 배포합니다. 수동 작업을 자동화!',
+        effect: '매턴 시작 시 랜덤 카드 1장 드로우.',
+        services: [
+          { name: 'GitHub Actions', provider: 'aws' },
+          { name: 'AWS CodePipeline', provider: 'aws' },
+          { name: 'GitLab CI', provider: 'gcp' }
+        ],
+        tip: '작은 변경을 자주 배포하세요. 문제 발생 시 원인 파악이 쉬워집니다.',
+        synergy: ['Docker', 'Kubernetes', 'Test']
+      },
+      {
+        id: 'terraform',
+        name: 'Terraform',
+        icon: '🏗️',
+        category: 'devops',
+        categoryName: 'DevOps',
+        cost: 2,
+        hp: 30,
+        attack: 15,
+        description: 'Infrastructure as Code 도구입니다. 인프라를 코드로 정의하고, 버전 관리하며, 재현 가능하게 만듭니다.',
+        effect: '파괴된 인프라 카드를 다음 턴에 동일하게 재생성.',
+        services: [
+          { name: 'Terraform', provider: 'aws' },
+          { name: 'AWS CloudFormation', provider: 'aws' },
+          { name: 'Pulumi', provider: 'gcp' }
+        ],
+        tip: '상태 파일(tfstate) 관리가 중요해요. S3 + DynamoDB로 원격 상태 관리하세요.',
+        synergy: ['Git', 'CI/CD', 'Module']
+      },
+      {
+        id: 'docker',
+        name: 'Docker',
+        icon: '🐳',
+        category: 'devops',
+        categoryName: 'DevOps',
+        cost: 1,
+        hp: 30,
+        attack: 10,
+        description: '컨테이너 플랫폼입니다. 앱과 의존성을 하나로 패키징해서 어디서든 동일하게 실행합니다.',
+        effect: 'Container 카드 비용 -1.',
+        services: [
+          { name: 'Docker', provider: 'aws' },
+          { name: 'Podman', provider: 'gcp' },
+          { name: 'containerd', provider: 'azure' }
+        ],
+        tip: '이미지 크기를 줄이면 배포 속도가 빨라져요. Alpine 베이스 이미지 추천!',
+        synergy: ['Container', 'Kubernetes', 'Registry']
+      },
+
+      // 모니터링
+      {
+        id: 'prometheus',
+        name: 'Prometheus',
+        icon: '📈',
+        category: 'monitoring',
+        categoryName: '모니터링',
+        cost: 2,
+        hp: 40,
+        attack: 0,
+        description: '메트릭 수집/모니터링 시스템입니다. CPU, 메모리, 요청 수 등을 수집하고 알림을 보냅니다.',
+        effect: '상대방 다음 공격 카드를 미리 확인.',
+        services: [
+          { name: 'Prometheus', provider: 'aws' },
+          { name: 'AWS CloudWatch', provider: 'aws' },
+          { name: 'Datadog', provider: 'gcp' }
+        ],
+        tip: 'Grafana와 함께 사용하면 예쁜 대시보드를 만들 수 있어요!',
+        synergy: ['Grafana', 'Alert', 'Kubernetes']
+      },
+      {
+        id: 'logging',
+        name: 'Log Aggregator',
+        icon: '📋',
+        category: 'monitoring',
+        categoryName: '모니터링',
+        cost: 2,
+        hp: 35,
+        attack: 0,
+        description: '로그 수집/분석 시스템입니다. 여러 서버의 로그를 한 곳에 모아 검색하고 분석합니다.',
+        effect: '공격받을 때 공격 카드 정보가 기록됨. 같은 공격 2회 시 데미지 50% 감소.',
+        services: [
+          { name: 'ELK Stack', provider: 'aws' },
+          { name: 'AWS CloudWatch Logs', provider: 'aws' },
+          { name: 'Loki', provider: 'gcp' }
+        ],
+        tip: '구조화된 로그(JSON)를 사용하면 검색이 훨씬 편해요.',
+        synergy: ['Prometheus', 'Alert', 'Debug']
+      }
+    ];
+
+    // DOM 요소
+    const cardGrid = document.getElementById('cardGrid');
+    const modalOverlay = document.getElementById('modalOverlay');
+
+    // 카드 렌더링
+    function renderCards(filter = 'all') {
+      const filteredCards = filter === 'all' 
+        ? cards 
+        : cards.filter(c => c.category === filter);
+
+      cardGrid.innerHTML = filteredCards.map(card => `
+        <div class="card ${card.category}" onclick="openModal('${card.id}')">
+          <div class="card-icon">${card.icon}</div>
+          <div class="card-name">${card.name}</div>
+          <div class="card-type">${card.categoryName}</div>
+          <div class="card-stats">
+            <div class="stat">
+              <div class="stat-value">${card.cost}</div>
+              <div class="stat-label">코스트</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">${card.hp}</div>
+              <div class="stat-label">HP</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">${card.attack}</div>
+              <div class="stat-label">ATK</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 모달 열기
+    function openModal(cardId) {
+      const card = cards.find(c => c.id === cardId);
+      if (!card) return;
+
+      document.getElementById('modalIcon').textContent = card.icon;
+      document.getElementById('modalName').textContent = card.name;
+      document.getElementById('modalCategory').textContent = card.categoryName;
+      
+      document.getElementById('modalStats').innerHTML = `
+        <div class="modal-stat">
+          <div class="modal-stat-value">${card.cost}</div>
+          <div class="modal-stat-label">코스트</div>
+        </div>
+        <div class="modal-stat">
+          <div class="modal-stat-value">${card.hp}</div>
+          <div class="modal-stat-label">HP</div>
+        </div>
+        <div class="modal-stat">
+          <div class="modal-stat-value">${card.attack}</div>
+          <div class="modal-stat-label">공격력</div>
+        </div>
+      `;
+
+      document.getElementById('modalDesc').textContent = card.description;
+      document.getElementById('modalEffect').textContent = card.effect;
+      
+      document.getElementById('modalServices').innerHTML = card.services.map(s => 
+        `<span class="service-tag ${s.provider}">${s.name}</span>`
+      ).join('');
+
+      document.getElementById('modalTip').innerHTML = `<strong>💡 Tip:</strong> ${card.tip}`;
+      
+      document.getElementById('modalSynergy').innerHTML = card.synergy.map(s => 
+        `<span class="service-tag">${s}</span>`
+      ).join('');
+
+      modalOverlay.classList.add('active');
+    }
+
+    // 모달 닫기
+    function closeModal() {
+      modalOverlay.classList.remove('active');
+    }
+
+    // 모달 외부 클릭 시 닫기
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+
+    // 탭 전환
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // 필터
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderCards(btn.dataset.filter);
+      });
+    });
+
+    // 튜토리얼 (임시)
+    function startTutorial() {
+      alert('🚧 튜토리얼 준비 중입니다!\n\n카드 도감에서 각 카드의 개념을 먼저 익혀보세요.');
+    }
+
+    // 초기화
+    renderCards();
+  </script>
+</body>
+</html>
