@@ -5,7 +5,7 @@
   "description": "인프라 카드게임으로 배우는 클라우드 아키텍처",
   "start_url": "./game-v2.html",
   "scope": "/openclaw-game/",
-  "display": "fullscreen",
+  "display": "standalone",
   "orientation": "landscape",
   "background_color": "#1a1a2e",
   "theme_color": "#00d9ff",
