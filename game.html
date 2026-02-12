@@ -14,7 +14,9 @@
     
     html, body {
       height: 100%;
+      height: 100dvh; /* dynamic viewport height */
       overflow: hidden;
+      touch-action: none;
     }
     body {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -23,6 +25,10 @@
       user-select: none;
       margin: 0;
       padding: 0;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
     }
 
     .container {
@@ -30,12 +36,15 @@
       margin: 0 auto;
       padding: 10px;
       height: 100%;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
     .container.game-mode {
-      padding: 5px;
+      padding: 3px;
+      max-width: 100%;
     }
 
     header {
@@ -248,32 +257,43 @@
     /* ========== 게임 화면 ========== */
     .game-wrapper {
       display: none;
-      gap: 10px;
+      gap: 5px;
       flex: 1;
       overflow: hidden;
+      height: 100%;
     }
 
-    .game-wrapper.active { display: flex; }
+    .game-wrapper.active { 
+      display: flex;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 5px;
+    }
 
     .game-main {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 3px;
       overflow: hidden;
-      min-height: 0;
+      height: 100%;
     }
 
-    /* 카드 정보 패널 (우측) */
+    /* 카드 정보 패널 (우측) - 데스크톱만 */
     .card-info-panel {
-      width: 280px;
+      width: 250px;
       background: rgba(0,0,0,0.3);
-      border-radius: 15px;
-      padding: 20px;
-      position: sticky;
-      top: 20px;
-      max-height: calc(100vh - 40px);
+      border-radius: 10px;
+      padding: 15px;
       overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 1000px) {
+      .card-info-panel { display: none !important; }
     }
 
     .card-info-panel.empty {
@@ -326,16 +346,18 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 15px;
+      padding: 4px 10px;
       background: rgba(0,0,0,0.3);
-      border-radius: 10px;
+      border-radius: 6px;
       flex-shrink: 0;
+      height: 36px;
+      min-height: 36px;
     }
 
     .turn-indicator {
-      font-size: 1.2em;
-      padding: 8px 20px;
-      border-radius: 20px;
+      font-size: 0.8em;
+      padding: 4px 12px;
+      border-radius: 12px;
       background: linear-gradient(90deg, #00d9ff, #00ff88);
       color: #000;
       font-weight: bold;
@@ -346,16 +368,16 @@
     .mana-display {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 1.3em;
+      gap: 5px;
+      font-size: 0.9em;
     }
 
-    .mana-orbs { display: flex; gap: 5px; }
+    .mana-orbs { display: flex; gap: 2px; }
     .mana-orb {
-      width: 25px; height: 25px;
+      width: 14px; height: 14px;
       border-radius: 50%;
       background: #00d9ff;
-      box-shadow: 0 0 10px #00d9ff;
+      box-shadow: 0 0 5px #00d9ff;
     }
     .mana-orb.empty { background: #333; box-shadow: none; }
 
@@ -363,13 +385,14 @@
     .player-section {
       display: flex;
       flex-direction: column;
-      gap: 5px;
-      padding: 8px;
+      gap: 3px;
+      padding: 5px;
       background: rgba(0,0,0,0.2);
-      border-radius: 10px;
+      border-radius: 8px;
       transition: all 0.3s;
       flex: 1;
       min-height: 0;
+      max-height: 25%;
       overflow: hidden;
     }
 
@@ -381,23 +404,24 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
     }
 
-    .player-name { font-weight: bold; font-size: 1.1em; }
+    .player-name { font-weight: bold; font-size: 0.75em; }
     .player-name.enemy { color: #e74c3c; }
     .player-name.player { color: #00d9ff; }
 
     .health-bar {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 5px;
     }
 
     .health-bar-bg {
-      width: 200px;
-      height: 20px;
+      width: 100px;
+      height: 12px;
       background: rgba(255,255,255,0.1);
-      border-radius: 10px;
+      border-radius: 6px;
       overflow: hidden;
     }
 
@@ -409,7 +433,7 @@
 
     .health-bar-fill.low { background: linear-gradient(90deg, #e74c3c, #c0392b); }
 
-    .health-text { font-weight: bold; min-width: 60px; }
+    .health-text { font-weight: bold; min-width: 50px; font-size: 0.7em; }
 
     .field {
       display: flex;
@@ -427,18 +451,18 @@
 
     .field-placeholder {
       color: #555;
-      font-size: 0.9em;
-      padding: 20px;
+      font-size: 0.65em;
+      padding: 5px;
       text-align: center;
       width: 100%;
     }
 
     .field-card {
-      width: 70px;
-      height: 80px;
+      width: 55px;
+      height: 60px;
       background: linear-gradient(145deg, #3a3a5a, #2a2a4a);
-      border-radius: 8px;
-      padding: 5px;
+      border-radius: 6px;
+      padding: 3px;
       text-align: center;
       position: relative;
       cursor: pointer;
@@ -447,6 +471,7 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
+      flex-shrink: 0;
     }
 
     .field-card:hover { border-color: #00d9ff; }
@@ -458,37 +483,39 @@
       50% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.8); }
     }
 
-    .field-card-icon { font-size: 1.5em; }
-    .field-card-name { font-size: 0.65em; margin-top: 2px; }
+    .field-card-icon { font-size: 1.2em; line-height: 1; }
+    .field-card-name { font-size: 0.5em; margin-top: 1px; line-height: 1; }
     .field-card-hp {
       position: absolute;
-      bottom: 5px; right: 5px;
+      bottom: 2px; right: 2px;
       background: #27ae60;
       color: #fff;
-      padding: 2px 6px;
-      border-radius: 8px;
-      font-size: 0.7em;
+      padding: 1px 3px;
+      border-radius: 4px;
+      font-size: 0.5em;
       font-weight: bold;
     }
     .field-card-atk {
       position: absolute;
-      bottom: 5px; left: 5px;
+      bottom: 2px; left: 2px;
       background: #e74c3c;
       color: #fff;
-      padding: 2px 6px;
-      border-radius: 8px;
-      font-size: 0.7em;
+      padding: 1px 3px;
+      border-radius: 4px;
+      font-size: 0.5em;
       font-weight: bold;
     }
 
     /* 배틀 로그 */
     .battle-log {
       background: rgba(0,0,0,0.4);
-      border-radius: 8px;
-      padding: 5px 10px;
-      height: 50px;
+      border-radius: 6px;
+      padding: 3px 8px;
+      height: 30px;
+      min-height: 30px;
+      max-height: 30px;
       overflow-y: auto;
-      font-size: 0.75em;
+      font-size: 0.65em;
       flex-shrink: 0;
     }
 
@@ -499,14 +526,16 @@
 
     /* 핸드 */
     .hand-section {
-      padding: 5px 10px;
+      padding: 3px 8px;
       background: rgba(0, 217, 255, 0.1);
-      border-radius: 10px;
+      border-radius: 8px;
       border: 1px solid rgba(0, 217, 255, 0.3);
       flex-shrink: 0;
+      max-height: 22%;
+      overflow: hidden;
     }
 
-    .hand-label { font-size: 0.7em; color: #888; margin-bottom: 5px; }
+    .hand-label { font-size: 0.65em; color: #888; margin-bottom: 3px; }
     .hand-label .mobile-hint { display: none; }
     @media (max-width: 768px) {
       .hand-label .desktop-hint { display: none; }
@@ -515,28 +544,31 @@
 
     .hand {
       display: flex;
-      gap: 8px;
+      gap: 5px;
       overflow-x: auto;
-      padding-bottom: 5px;
-      height: 100px;
+      overflow-y: hidden;
+      height: calc(100% - 18px);
       align-items: center;
     }
 
     .hand-card {
-      min-width: 75px;
-      height: 90px;
+      min-width: 60px;
+      height: 100%;
+      max-height: 80px;
       background: linear-gradient(145deg, #3a3a5a, #2a2a4a);
-      border-radius: 8px;
-      padding: 5px;
+      border-radius: 6px;
+      padding: 3px;
       cursor: grab;
       transition: all 0.2s;
       border: 2px solid transparent;
       position: relative;
       flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .hand-card:hover {
-      transform: translateY(-10px);
       border-color: #00d9ff;
       z-index: 10;
     }
@@ -564,29 +596,27 @@
 
     .hand-card-cost {
       position: absolute;
-      top: -5px; right: -5px;
+      top: -3px; right: -3px;
       background: #00d9ff;
       color: #000;
-      width: 20px; height: 20px;
+      width: 16px; height: 16px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      font-size: 0.75em;
+      font-size: 0.65em;
     }
 
     .hand-card.disabled .hand-card-cost { background: #666; }
 
-    .hand-card-icon { font-size: 1.6em; text-align: center; }
-    .hand-card-name { font-size: 0.65em; text-align: center; margin-top: 2px; font-weight: bold; }
+    .hand-card-icon { font-size: 1.3em; text-align: center; line-height: 1; }
+    .hand-card-name { font-size: 0.55em; text-align: center; margin-top: 1px; font-weight: bold; line-height: 1.1; }
     .hand-card-stats { 
       display: flex; 
       justify-content: space-around; 
-      font-size: 0.6em; 
-      margin-top: 3px; 
-      padding-top: 3px;
-      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.5em; 
+      margin-top: 2px;
     }
 
     /* 드래그 고스트 */
@@ -602,19 +632,21 @@
     .game-controls {
       display: flex;
       justify-content: center;
-      gap: 10px;
-      padding: 5px;
+      gap: 8px;
+      padding: 3px;
       flex-shrink: 0;
+      height: 32px;
+      min-height: 32px;
     }
 
     .game-btn {
-      padding: 8px 20px;
+      padding: 5px 15px;
       border: none;
-      border-radius: 20px;
+      border-radius: 15px;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.3s;
-      font-size: 0.85em;
+      font-size: 0.75em;
     }
 
     .game-btn.primary {
