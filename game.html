@@ -2,7 +2,12 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a1a2e">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.svg">
   <title>서버 디펜스 - 인프라 카드게임</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -656,9 +661,43 @@
       .game-wrapper { flex-direction: column; }
       .card-info-panel { width: 100%; position: static; max-height: none; }
     }
+
+    /* 가로모드 유도 오버레이 */
+    .rotate-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #1a1a2e;
+      z-index: 9999;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+    .rotate-overlay .rotate-icon {
+      font-size: 4em;
+      margin-bottom: 20px;
+      animation: rotateHint 2s infinite;
+    }
+    @keyframes rotateHint {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(90deg); }
+    }
+    .rotate-overlay p { color: #888; font-size: 1.2em; }
+
+    @media (max-width: 768px) and (orientation: portrait) {
+      .rotate-overlay { display: flex; }
+    }
   </style>
 </head>
 <body>
+  <!-- 가로모드 유도 오버레이 -->
+  <div class="rotate-overlay">
+    <div class="rotate-icon">📱</div>
+    <h2 style="color: #00d9ff; margin-bottom: 10px;">가로로 돌려주세요!</h2>
+    <p>더 나은 게임 경험을 위해<br>기기를 가로로 회전해주세요</p>
+  </div>
   <div class="container">
     <header>
       <h1>🃏 서버 디펜스</h1>
@@ -1515,6 +1554,13 @@
 
     // 초기화
     renderCards();
+
+    // PWA Service Worker 등록
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('SW registered'))
+        .catch(err => console.log('SW registration failed'));
+    }
   </script>
 </body>
 </html>

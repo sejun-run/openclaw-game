@@ -1,0 +1,22 @@
+{
+  "name": "서버 디펜스 - 인프라 카드게임",
+  "short_name": "서버 디펜스",
+  "description": "인프라 카드게임으로 배우는 클라우드 아키텍처",
+  "start_url": "/openclaw-game/game.html",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#1a1a2e",
+  "theme_color": "#00d9ff",
+  "icons": [
+    {
+      "src": "icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "icon-192.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
