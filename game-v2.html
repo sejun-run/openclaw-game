@@ -527,6 +527,32 @@
     .game-over.win h2 { color: #00ff88; }
     .game-over.lose h2 { color: #e74c3c; }
     .game-over p { color: #888; margin-bottom: 30px; }
+
+    /* 드래그 고스트 */
+    .drag-ghost {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.9;
+      transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
+      transition: transform 0.1s;
+    }
+
+    .drag-ghost .hand-card {
+      margin: 0;
+      box-shadow: 0 20px 60px rgba(0, 217, 255, 0.6);
+      border-color: #00d9ff;
+    }
+
+    /* 드래그 중 필드 하이라이트 */
+    .field.drop-target {
+      background: rgba(0, 255, 136, 0.2);
+      border: 2px dashed #00ff88;
+    }
+
+    .hand-card.dragging {
+      opacity: 0.3;
+    }
   </style>
 </head>
 <body>
@@ -643,6 +669,9 @@
       <button class="btn btn-primary" onclick="restartGame()">다시 하기</button>
     </div>
   </div>
+
+  <!-- 드래그 고스트 -->
+  <div class="drag-ghost" id="dragGhost" style="display: none;"></div>
 
   <script>
     // 카드 데이터
@@ -988,6 +1017,160 @@
             </div>
           `).join('')
         : '<span class="field-placeholder">적 서버</span>';
+
+      // 드래그 이벤트 바인딩
+      bindDragEvents();
+    }
+
+    // ========== 드래그 시스템 ==========
+    let dragState = {
+      active: false,
+      cardIndex: null,
+      startX: 0,
+      startY: 0,
+      ghost: null,
+      longPressTimer: null
+    };
+
+    function bindDragEvents() {
+      const cards = document.querySelectorAll('#playerHand .hand-card');
+      cards.forEach((card, index) => {
+        // 터치 이벤트
+        card.addEventListener('touchstart', (e) => startDrag(e, index), { passive: false });
+        // 마우스 이벤트
+        card.addEventListener('mousedown', (e) => startDrag(e, index));
+      });
+    }
+
+    function startDrag(e, index) {
+      const card = game.player.hand[index];
+      if (!card || card.cost > game.mana) return;
+
+      e.preventDefault();
+      const touch = e.touches ? e.touches[0] : e;
+      
+      dragState.startX = touch.clientX;
+      dragState.startY = touch.clientY;
+      dragState.cardIndex = index;
+
+      // 롱프레스 → 상세 보기 (300ms)
+      dragState.longPressTimer = setTimeout(() => {
+        if (!dragState.active) {
+          selectCard(index);
+        }
+      }, 300);
+
+      // 드래그 시작 리스너
+      document.addEventListener('touchmove', onDragMove, { passive: false });
+      document.addEventListener('touchend', onDragEnd);
+      document.addEventListener('mousemove', onDragMove);
+      document.addEventListener('mouseup', onDragEnd);
+    }
+
+    function onDragMove(e) {
+      e.preventDefault();
+      const touch = e.touches ? e.touches[0] : e;
+      const dx = touch.clientX - dragState.startX;
+      const dy = touch.clientY - dragState.startY;
+
+      // 10px 이상 이동하면 드래그 시작
+      if (!dragState.active && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
+        clearTimeout(dragState.longPressTimer);
+        dragState.active = true;
+        showDragGhost(dragState.cardIndex, touch.clientX, touch.clientY);
+        
+        // 원본 카드 흐리게
+        const cards = document.querySelectorAll('#playerHand .hand-card');
+        if (cards[dragState.cardIndex]) {
+          cards[dragState.cardIndex].classList.add('dragging');
+        }
+      }
+
+      if (dragState.active) {
+        moveDragGhost(touch.clientX, touch.clientY);
+        checkDropTarget(touch.clientX, touch.clientY);
+      }
+    }
+
+    function onDragEnd(e) {
+      clearTimeout(dragState.longPressTimer);
+      
+      document.removeEventListener('touchmove', onDragMove);
+      document.removeEventListener('touchend', onDragEnd);
+      document.removeEventListener('mousemove', onDragMove);
+      document.removeEventListener('mouseup', onDragEnd);
+
+      if (dragState.active) {
+        const touch = e.changedTouches ? e.changedTouches[0] : e;
+        const dropped = tryDrop(touch.clientX, touch.clientY);
+        
+        hideDragGhost();
+        
+        // 원본 카드 복원
+        const cards = document.querySelectorAll('#playerHand .hand-card');
+        cards.forEach(c => c.classList.remove('dragging'));
+        
+        // 드롭 영역 하이라이트 제거
+        document.getElementById('playerField').classList.remove('drop-target');
+      }
+
+      dragState.active = false;
+      dragState.cardIndex = null;
+    }
+
+    function showDragGhost(index, x, y) {
+      const card = game.player.hand[index];
+      const ghost = document.getElementById('dragGhost');
+      ghost.innerHTML = `
+        <div class="hand-card">
+          <span class="cost">${card.cost}</span>
+          <span class="icon">${card.icon}</span>
+          <span class="name">${card.name}</span>
+        </div>
+      `;
+      ghost.style.left = x + 'px';
+      ghost.style.top = y + 'px';
+      ghost.style.display = 'block';
+    }
+
+    function moveDragGhost(x, y) {
+      const ghost = document.getElementById('dragGhost');
+      ghost.style.left = x + 'px';
+      ghost.style.top = y + 'px';
+    }
+
+    function hideDragGhost() {
+      document.getElementById('dragGhost').style.display = 'none';
+    }
+
+    function checkDropTarget(x, y) {
+      const field = document.getElementById('playerField');
+      const rect = field.getBoundingClientRect();
+      
+      if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+        field.classList.add('drop-target');
+      } else {
+        field.classList.remove('drop-target');
+      }
+    }
+
+    function tryDrop(x, y) {
+      const field = document.getElementById('playerField');
+      const rect = field.getBoundingClientRect();
+      
+      if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+        // 드롭 성공 → 카드 배치
+        const card = game.player.hand[dragState.cardIndex];
+        if (card && card.cost <= game.mana) {
+          game.mana -= card.cost;
+          game.player.field.push({ ...card, currentHp: card.hp, canAttack: false });
+          game.player.hand.splice(dragState.cardIndex, 1);
+          addLog(`${card.icon} ${card.name} 배치!`, 'info');
+          updateUI();
+          return true;
+        }
+      }
+      return false;
     }
   </script>
 </body>
