@@ -1,6 +1,6 @@
-const CACHE_NAME = 'server-defense-v1';
+const CACHE_NAME = 'server-defense-v2';
 const urlsToCache = [
-  '/openclaw-game/game.html',
+  '/openclaw-game/game-v2.html',
   '/openclaw-game/manifest.json'
 ];
 
