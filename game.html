@@ -1376,10 +1376,8 @@
         return `
           <div class="hand-card ${disabled ? 'disabled' : ''}" 
                draggable="${!disabled}" 
-               ondragstart="handleDragStart(event, ${i})"
-               ondragend="handleDragEnd(event)"
-               onmouseenter="showCardInfo(gameState.player.hand[${i}])"
-               onmouseleave="showCardInfo(null)">
+               data-index="${i}"
+               data-card-id="${card.id}">
             <div class="hand-card-cost">${card.cost}</div>
             <div class="hand-card-icon">${card.icon}</div>
             <div class="hand-card-name">${card.name}</div>
@@ -1391,13 +1389,22 @@
         `;
       }).join('');
 
+      // 핸드 카드 이벤트 바인딩
+      document.querySelectorAll('#playerHand .hand-card').forEach(el => {
+        const idx = parseInt(el.dataset.index);
+        const cardId = el.dataset.cardId;
+        el.ondragstart = (e) => handleDragStart(e, idx);
+        el.ondragend = handleDragEnd;
+        el.onmouseenter = () => showCardInfo(allCards.find(c => c.id === cardId));
+        el.onmouseleave = () => showCardInfo(null);
+      });
+
       // 플레이어 필드
       playerField.innerHTML = gameState.player.field.length > 0 
         ? gameState.player.field.map((card, i) => `
           <div class="field-card ${card.canAttack ? 'can-attack' : ''}" 
-               onclick="attackWithFieldCard(${i})"
-               onmouseenter="showCardInfo(allCards.find(c => c.id === '${card.id}'))"
-               onmouseleave="showCardInfo(null)">
+               data-index="${i}"
+               data-card-id="${card.id}">
             <div class="field-card-icon">${card.icon}</div>
             <div class="field-card-name">${card.name}</div>
             <div class="field-card-atk">⚔️${card.attack}</div>
@@ -1406,12 +1413,19 @@
         `).join('')
         : '<div class="field-placeholder">카드를 여기에 드래그하세요</div>';
 
+      // 플레이어 필드 이벤트 바인딩
+      document.querySelectorAll('#playerField .field-card').forEach(el => {
+        const idx = parseInt(el.dataset.index);
+        const cardId = el.dataset.cardId;
+        el.onclick = () => attackWithFieldCard(idx);
+        el.onmouseenter = () => showCardInfo(allCards.find(c => c.id === cardId));
+        el.onmouseleave = () => showCardInfo(null);
+      });
+
       // 적 필드
       enemyField.innerHTML = gameState.enemy.field.length > 0
         ? gameState.enemy.field.map(card => `
-          <div class="field-card"
-               onmouseenter="showCardInfo(allCards.find(c => c.id === '${card.id}'))"
-               onmouseleave="showCardInfo(null)">
+          <div class="field-card" data-card-id="${card.id}">
             <div class="field-card-icon">${card.icon}</div>
             <div class="field-card-name">${card.name}</div>
             <div class="field-card-atk">⚔️${card.attack}</div>
@@ -1419,6 +1433,13 @@
           </div>
         `).join('')
         : '<div class="field-placeholder">적 서버</div>';
+
+      // 적 필드 이벤트 바인딩
+      document.querySelectorAll('#enemyField .field-card').forEach(el => {
+        const cardId = el.dataset.cardId;
+        el.onmouseenter = () => showCardInfo(allCards.find(c => c.id === cardId));
+        el.onmouseleave = () => showCardInfo(null);
+      });
 
       // 드롭 영역 이벤트
       playerSection.ondragover = handleDragOver;
