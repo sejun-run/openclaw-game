@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>인프라 마스터 - AI 시대 필수 지식</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: #0d1117;
+      color: #c9d1d9;
+      font-family: 'Consolas', 'Monaco', monospace;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      background: #161b22;
+    }
+    
+    h1 {
+      color: #58a6ff;
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #8b949e;
+      font-size: 0.9em;
+    }
+    
+    .game-area {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      .game-area { grid-template-columns: 1fr; }
+    }
+    
+    .terminal {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    
+    .terminal-header {
+      background: #161b22;
+      padding: 10px 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #30363d;
+    }
+    
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27ca40; }
+    
+    .terminal-title {
+      color: #8b949e;
+      font-size: 0.85em;
+      margin-left: 10px;
+    }
+    
+    .terminal-body {
+      padding: 15px;
+      height: 400px;
+      overflow-y: auto;
+    }
+    
+    .output-line {
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    
+    .output-line.success { color: #3fb950; }
+    .output-line.error { color: #f85149; }
+    .output-line.info { color: #58a6ff; }
+    .output-line.warning { color: #d29922; }
+    .output-line.system { color: #8b949e; }
+    
+    .input-area {
+      display: flex;
+      align-items: center;
+      padding: 10px 15px;
+      border-top: 1px solid #30363d;
+      background: #161b22;
+    }
+    
+    .prompt {
+      color: #3fb950;
+      margin-right: 10px;
+    }
+    
+    #command-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #c9d1d9;
+      font-family: inherit;
+      font-size: 1em;
+      outline: none;
+    }
+    
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .panel {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 15px;
+    }
+    
+    .panel-title {
+      color: #58a6ff;
+      font-size: 0.9em;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #30363d;
+    }
+    
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.85em;
+    }
+    
+    .status-label { color: #8b949e; }
+    .status-value { color: #c9d1d9; }
+    .status-value.online { color: #3fb950; }
+    .status-value.offline { color: #f85149; }
+    
+    .mission {
+      font-size: 0.9em;
+      line-height: 1.6;
+    }
+    
+    .mission-title {
+      color: #d29922;
+      margin-bottom: 8px;
+    }
+    
+    .hint {
+      background: #1f2428;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+      font-size: 0.85em;
+      color: #8b949e;
+    }
+    
+    .hint code {
+      background: #30363d;
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: #f0883e;
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background: #30363d;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #238636, #3fb950);
+      transition: width 0.5s ease;
+    }
+    
+    .commands-list {
+      font-size: 0.8em;
+    }
+    
+    .cmd-item {
+      padding: 5px 0;
+      border-bottom: 1px solid #21262d;
+    }
+    
+    .cmd-item:last-child { border-bottom: none; }
+    
+    .cmd-name { color: #f0883e; }
+    .cmd-desc { color: #8b949e; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🖥️ 인프라 마스터</h1>
+      <p class="subtitle">AI 시대, 개발자가 알아야 할 인프라 지식을 게임으로 배우세요</p>
+    </header>
+    
+    <div class="game-area">
+      <div class="terminal">
+        <div class="terminal-header">
+          <span class="terminal-dot dot-red"></span>
+          <span class="terminal-dot dot-yellow"></span>
+          <span class="terminal-dot dot-green"></span>
+          <span class="terminal-title">server@infra-master:~</span>
+        </div>
+        <div class="terminal-body" id="output">
+          <div class="output-line system">인프라 마스터 v1.0에 오신 것을 환영합니다!</div>
+          <div class="output-line system">------------------------------------------</div>
+          <div class="output-line info">💡 'help'를 입력하면 사용 가능한 명령어를 볼 수 있습니다.</div>
+          <div class="output-line"></div>
+        </div>
+        <div class="input-area">
+          <span class="prompt">$</span>
+          <input type="text" id="command-input" placeholder="명령어를 입력하세요..." autofocus>
+        </div>
+      </div>
+      
+      <div class="sidebar">
+        <div class="panel">
+          <div class="panel-title">📊 서버 상태</div>
+          <div class="status-item">
+            <span class="status-label">웹서버</span>
+            <span class="status-value" id="web-status">offline</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">데이터베이스</span>
+            <span class="status-value" id="db-status">offline</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">캐시</span>
+            <span class="status-value" id="cache-status">offline</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">트래픽</span>
+            <span class="status-value" id="traffic">0 req/s</span>
+          </div>
+        </div>
+        
+        <div class="panel">
+          <div class="panel-title">🎯 현재 미션</div>
+          <div class="mission" id="mission">
+            <div class="mission-title">레벨 1: 서버 시작하기</div>
+            <p>웹서버를 시작해서 서비스를 온라인으로 만드세요.</p>
+            <div class="hint">
+              힌트: <code>start web</code> 명령어를 사용해보세요
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress" style="width: 0%"></div>
+          </div>
+        </div>
+        
+        <div class="panel">
+          <div class="panel-title">📝 명령어</div>
+          <div class="commands-list" id="commands-list">
+            <div class="cmd-item"><span class="cmd-name">help</span> - <span class="cmd-desc">명령어 목록</span></div>
+            <div class="cmd-item"><span class="cmd-name">status</span> - <span class="cmd-desc">서버 상태 확인</span></div>
+            <div class="cmd-item"><span class="cmd-name">start [서비스]</span> - <span class="cmd-desc">서비스 시작</span></div>
+            <div class="cmd-item"><span class="cmd-name">stop [서비스]</span> - <span class="cmd-desc">서비스 중지</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 게임 상태
+    const state = {
+      level: 1,
+      services: {
+        web: false,
+        db: false,
+        cache: false
+      },
+      traffic: 0,
+      completedMissions: [],
+      unlockedCommands: ['help', 'status', 'start', 'stop']
+    };
+
+    // 미션 데이터
+    const missions = {
+      1: {
+        title: '레벨 1: 서버 시작하기',
+        description: '웹서버를 시작해서 서비스를 온라인으로 만드세요.',
+        hint: '<code>start web</code> 명령어를 사용해보세요',
+        check: () => state.services.web,
+        reward: '웹서버가 온라인이 되었습니다! 이제 사용자들이 접속할 수 있어요.',
+        teach: '💡 배운 개념: 서버는 항상 실행 중이어야 사용자가 접속할 수 있습니다. pm2, systemd 같은 프로세스 매니저가 이 역할을 합니다.'
+      },
+      2: {
+        title: '레벨 2: 데이터베이스 연결',
+        description: '데이터를 저장할 데이터베이스를 시작하세요.',
+        hint: '<code>start db</code>로 데이터베이스를 시작하세요',
+        check: () => state.services.web && state.services.db,
+        reward: '데이터베이스가 연결되었습니다!',
+        teach: '💡 배운 개념: 웹서버는 데이터를 DB에 저장합니다. MySQL, PostgreSQL, MongoDB 등이 있어요.'
+      },
+      3: {
+        title: '레벨 3: 캐시로 속도 향상',
+        description: '트래픽이 늘어났습니다! 캐시를 활성화해서 응답 속도를 높이세요.',
+        hint: '<code>start cache</code>로 캐시 서버를 시작하세요',
+        check: () => state.services.web && state.services.db && state.services.cache,
+        reward: '캐시가 활성화되었습니다! 응답 속도가 10배 빨라졌어요.',
+        teach: '💡 배운 개념: 캐시는 자주 요청되는 데이터를 메모리에 저장합니다. Redis, Memcached가 대표적이에요.'
+      },
+      4: {
+        title: '🎉 축하합니다!',
+        description: '기본 인프라 구성을 완료했습니다!',
+        hint: '다음 업데이트에서 더 많은 레벨이 추가됩니다.',
+        check: () => false,
+        reward: '',
+        teach: ''
+      }
+    };
+
+    // DOM 요소
+    const output = document.getElementById('output');
+    const input = document.getElementById('command-input');
+    const webStatus = document.getElementById('web-status');
+    const dbStatus = document.getElementById('db-status');
+    const cacheStatus = document.getElementById('cache-status');
+    const trafficEl = document.getElementById('traffic');
+    const missionEl = document.getElementById('mission');
+    const progressEl = document.getElementById('progress');
+
+    // 출력 함수
+    function print(text, className = '') {
+      const line = document.createElement('div');
+      line.className = 'output-line ' + className;
+      line.innerHTML = text;
+      output.appendChild(line);
+      output.scrollTop = output.scrollHeight;
+    }
+
+    // UI 업데이트
+    function updateUI() {
+      webStatus.textContent = state.services.web ? 'online' : 'offline';
+      webStatus.className = 'status-value ' + (state.services.web ? 'online' : 'offline');
+      
+      dbStatus.textContent = state.services.db ? 'online' : 'offline';
+      dbStatus.className = 'status-value ' + (state.services.db ? 'online' : 'offline');
+      
+      cacheStatus.textContent = state.services.cache ? 'online' : 'offline';
+      cacheStatus.className = 'status-value ' + (state.services.cache ? 'online' : 'offline');
+      
+      trafficEl.textContent = state.traffic + ' req/s';
+      
+      const mission = missions[state.level];
+      missionEl.innerHTML = `
+        <div class="mission-title">${mission.title}</div>
+        <p>${mission.description}</p>
+        <div class="hint">힌트: ${mission.hint}</div>
+      `;
+      
+      progressEl.style.width = ((state.level - 1) / 3 * 100) + '%';
+    }
+
+    // 미션 체크
+    function checkMission() {
+      const mission = missions[state.level];
+      if (mission.check()) {
+        print('');
+        print('✅ ' + mission.reward, 'success');
+        print(mission.teach, 'info');
+        print('');
+        state.level++;
+        
+        if (state.level === 2) {
+          state.traffic = 10;
+        } else if (state.level === 3) {
+          state.traffic = 100;
+        } else if (state.level === 4) {
+          state.traffic = 500;
+          print('🎉 모든 기본 미션을 완료했습니다!', 'success');
+          print('');
+          print('📚 배운 내용 정리:', 'info');
+          print('  • 서버: 항상 실행 중이어야 서비스 가능 (pm2, systemd)', 'system');
+          print('  • DB: 데이터 영구 저장 (MySQL, PostgreSQL, MongoDB)', 'system');
+          print('  • 캐시: 빠른 응답을 위한 메모리 저장소 (Redis)', 'system');
+          print('');
+          print('👉 다음 업데이트: Docker, 로드밸런서, CI/CD 등', 'info');
+        }
+        
+        updateUI();
+      }
+    }
+
+    // 명령어 처리
+    function processCommand(cmd) {
+      const parts = cmd.trim().toLowerCase().split(' ');
+      const command = parts[0];
+      const arg = parts[1];
+
+      print('$ ' + cmd, 'system');
+
+      switch (command) {
+        case 'help':
+          print('');
+          print('사용 가능한 명령어:', 'info');
+          print('  help          - 이 도움말 표시');
+          print('  status        - 모든 서비스 상태 확인');
+          print('  start [서비스] - 서비스 시작 (web, db, cache)');
+          print('  stop [서비스]  - 서비스 중지');
+          print('  clear         - 화면 지우기');
+          print('');
+          break;
+
+        case 'status':
+          print('');
+          print('서비스 상태:', 'info');
+          print('  웹서버:     ' + (state.services.web ? '🟢 online' : '🔴 offline'));
+          print('  데이터베이스: ' + (state.services.db ? '🟢 online' : '🔴 offline'));
+          print('  캐시:       ' + (state.services.cache ? '🟢 online' : '🔴 offline'));
+          print('  트래픽:     ' + state.traffic + ' req/s');
+          print('');
+          break;
+
+        case 'start':
+          if (!arg) {
+            print('사용법: start [web|db|cache]', 'error');
+          } else if (arg === 'web') {
+            if (state.services.web) {
+              print('웹서버가 이미 실행 중입니다.', 'warning');
+            } else {
+              print('웹서버를 시작합니다...', 'system');
+              setTimeout(() => {
+                state.services.web = true;
+                print('✅ 웹서버가 시작되었습니다! (포트 3000)', 'success');
+                updateUI();
+                checkMission();
+              }, 500);
+            }
+          } else if (arg === 'db') {
+            if (!state.services.web) {
+              print('⚠️ 웹서버를 먼저 시작해야 합니다.', 'warning');
+            } else if (state.services.db) {
+              print('데이터베이스가 이미 실행 중입니다.', 'warning');
+            } else {
+              print('데이터베이스를 시작합니다...', 'system');
+              setTimeout(() => {
+                state.services.db = true;
+                print('✅ PostgreSQL 데이터베이스가 시작되었습니다! (포트 5432)', 'success');
+                updateUI();
+                checkMission();
+              }, 800);
+            }
+          } else if (arg === 'cache') {
+            if (!state.services.db) {
+              print('⚠️ 데이터베이스를 먼저 시작해야 합니다.', 'warning');
+            } else if (state.services.cache) {
+              print('캐시가 이미 실행 중입니다.', 'warning');
+            } else {
+              print('캐시 서버를 시작합니다...', 'system');
+              setTimeout(() => {
+                state.services.cache = true;
+                print('✅ Redis 캐시가 시작되었습니다! (포트 6379)', 'success');
+                updateUI();
+                checkMission();
+              }, 600);
+            }
+          } else {
+            print('알 수 없는 서비스: ' + arg, 'error');
+          }
+          break;
+
+        case 'stop':
+          if (!arg) {
+            print('사용법: stop [web|db|cache]', 'error');
+          } else if (state.services[arg]) {
+            state.services[arg] = false;
+            print('🛑 ' + arg + ' 서비스가 중지되었습니다.', 'warning');
+            updateUI();
+          } else {
+            print(arg + ' 서비스가 실행 중이 아닙니다.', 'error');
+          }
+          break;
+
+        case 'clear':
+          output.innerHTML = '';
+          break;
+
+        case '':
+          break;
+
+        default:
+          print('알 수 없는 명령어: ' + command, 'error');
+          print("'help'를 입력하면 사용 가능한 명령어를 볼 수 있습니다.", 'system');
+      }
+    }
+
+    // 이벤트 리스너
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const cmd = input.value;
+        input.value = '';
+        processCommand(cmd);
+      }
+    });
+
+    // 초기화
+    updateUI();
+  </script>
+</body>
+</html>
