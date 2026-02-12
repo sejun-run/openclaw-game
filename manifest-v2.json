@@ -22,19 +22,5 @@
       "type": "image/png",
       "purpose": "any"
     }
-  ],
-  "screenshots": [
-    {
-      "src": "./screenshot-mobile.png",
-      "sizes": "540x720",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "./screenshot-wide.png",
-      "sizes": "720x540",
-      "type": "image/png",
-      "form_factor": "wide"
-    }
   ]
 }
