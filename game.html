@@ -468,6 +468,11 @@
     }
 
     .hand-label { font-size: 0.85em; color: #888; margin-bottom: 10px; }
+    .hand-label .mobile-hint { display: none; }
+    @media (max-width: 768px) {
+      .hand-label .desktop-hint { display: none; }
+      .hand-label .mobile-hint { display: inline; }
+    }
 
     .hand {
       display: flex;
@@ -508,6 +513,12 @@
     .hand-card.disabled:hover {
       transform: none;
       border-color: transparent;
+    }
+
+    .hand-card.selected {
+      transform: translateY(-20px);
+      border-color: #00ff88;
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
     }
 
     .hand-card-cost {
@@ -745,7 +756,7 @@
 
           <!-- 핸드 -->
           <div class="hand-section">
-            <div class="hand-label">🎴 내 패 (카드를 드래그해서 필드에 놓기 | 호버하면 설명 보기)</div>
+            <div class="hand-label">🎴 내 패 <span class="desktop-hint">(드래그 또는 클릭해서 배치 | 호버하면 설명)</span><span class="mobile-hint">(탭해서 선택 → 필드 탭해서 배치)</span></div>
             <div class="hand" id="playerHand"></div>
           </div>
 
@@ -953,6 +964,8 @@
     let draggedCard = null;
     let draggedIndex = null;
     let hoveredCard = null;
+    let selectedHandIndex = null; // 모바일용 선택된 카드
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
 
     // ============ DOM ============
     const cardGrid = document.getElementById('cardGrid');
@@ -1373,9 +1386,10 @@
       // 핸드
       playerHand.innerHTML = gameState.player.hand.map((card, i) => {
         const disabled = card.cost > gameState.currentMana;
+        const selected = selectedHandIndex === i;
         return `
-          <div class="hand-card ${disabled ? 'disabled' : ''}" 
-               draggable="${!disabled}" 
+          <div class="hand-card ${disabled ? 'disabled' : ''} ${selected ? 'selected' : ''}" 
+               draggable="${!disabled && !isMobile}" 
                data-index="${i}"
                data-card-id="${card.id}">
             <div class="hand-card-cost">${card.cost}</div>
@@ -1393,10 +1407,33 @@
       document.querySelectorAll('#playerHand .hand-card').forEach(el => {
         const idx = parseInt(el.dataset.index);
         const cardId = el.dataset.cardId;
-        el.ondragstart = (e) => handleDragStart(e, idx);
-        el.ondragend = handleDragEnd;
-        el.onmouseenter = () => showCardInfo(allCards.find(c => c.id === cardId));
-        el.onmouseleave = () => showCardInfo(null);
+        const card = gameState.player.hand[idx];
+        
+        if (isMobile) {
+          // 모바일: 탭해서 선택
+          el.onclick = () => {
+            if (card.cost > gameState.currentMana) return;
+            if (selectedHandIndex === idx) {
+              selectedHandIndex = null; // 선택 해제
+            } else {
+              selectedHandIndex = idx; // 선택
+              showCardInfo(allCards.find(c => c.id === cardId));
+            }
+            updateUI();
+          };
+        } else {
+          // 데스크톱: 드래그
+          el.ondragstart = (e) => handleDragStart(e, idx);
+          el.ondragend = handleDragEnd;
+          el.onmouseenter = () => showCardInfo(allCards.find(c => c.id === cardId));
+          el.onmouseleave = () => showCardInfo(null);
+          el.onclick = () => {
+            // 데스크톱에서도 클릭으로 배치 가능
+            if (card.cost <= gameState.currentMana) {
+              playCard(idx);
+            }
+          };
+        }
       });
 
       // 플레이어 필드
@@ -1445,6 +1482,17 @@
       playerSection.ondragover = handleDragOver;
       playerSection.ondragleave = handleDragLeave;
       playerSection.ondrop = handleDrop;
+
+      // 모바일: 필드 탭하면 선택된 카드 배치
+      if (isMobile) {
+        playerField.onclick = (e) => {
+          if (e.target.classList.contains('field-card')) return; // 필드 카드 클릭은 공격
+          if (selectedHandIndex !== null) {
+            playCard(selectedHandIndex);
+            selectedHandIndex = null;
+          }
+        };
+      }
     }
 
     // ============ 탭/필터 ============
