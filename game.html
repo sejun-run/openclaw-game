@@ -461,6 +461,12 @@
 
     .hand-card.disabled { opacity: 0.5; }
     .hand-card.dragging { opacity: 0.3; }
+    
+    /* 구매 가능한 카드 하이라이트 */
+    .hand-card.playable {
+      border-color: #00ff88;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    }
 
     .hand-card .cost {
       position: absolute;
@@ -498,7 +504,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
+      padding-top: 5px;
       cursor: pointer;
       position: relative;
       transition: all 0.2s;
@@ -545,28 +552,38 @@
       border-color: #00d9ff;
     }
 
-    .field-card .icon { font-size: 1.2em; }
-    .field-card .name { font-size: 0.5em; }
+    .field-card .icon { font-size: 1.3em; line-height: 1; }
+    .field-card .name { 
+      font-size: 0.45em; 
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
 
-    .field-card .card-hp {
+    .field-card .card-stats-row {
       position: absolute;
       bottom: 2px;
+      left: 2px;
       right: 2px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .field-card .card-hp {
       background: #27ae60;
-      padding: 1px 3px;
+      padding: 1px 4px;
       border-radius: 3px;
-      font-size: 0.45em;
+      font-size: 0.5em;
       font-weight: bold;
     }
 
     .field-card .card-atk {
-      position: absolute;
-      bottom: 2px;
-      left: 2px;
       background: #e74c3c;
-      padding: 1px 3px;
+      padding: 1px 4px;
       border-radius: 3px;
-      font-size: 0.45em;
+      font-size: 0.5em;
       font-weight: bold;
     }
 
@@ -1539,10 +1556,10 @@
       // 핸드
       const hand = document.getElementById('playerHand');
       hand.innerHTML = game.player.hand.map((card, i) => {
-        const disabled = card.cost > game.mana;
+        const canPlay = card.cost <= game.mana;
         const rot = (i - (game.player.hand.length - 1) / 2) * 5;
         return `
-          <div class="hand-card ${disabled ? 'disabled' : ''}" 
+          <div class="hand-card ${!canPlay ? 'disabled' : 'playable'}" 
                style="transform: rotate(${rot}deg);"
                data-index="${i}">
             <span class="cost">${card.cost}</span>
@@ -1563,11 +1580,14 @@
             const totalAtk = card.attack + (card.bonusAtk || 0);
             const hasBonus = card.bonusAtk > 0;
             return `
-            <div class="field-card ${card.canAttack ? 'can-attack' : ''} ${hasBonus ? 'synergy' : ''}" onclick="attackWith(${i})">
+            <div class="field-card ${card.canAttack ? 'can-attack' : ''} ${hasBonus ? 'synergy' : ''}" 
+                 data-field-index="${i}" data-card-id="${card.id}">
               <span class="icon">${card.icon}</span>
               <span class="name">${card.name}</span>
-              <span class="card-atk" ${hasBonus ? 'style="background:#f39c12"' : ''}>⚔${totalAtk}</span>
-              <span class="card-hp">❤${card.currentHp}</span>
+              <div class="card-stats-row">
+                <span class="card-atk" ${hasBonus ? 'style="background:#f39c12"' : ''}>⚔${totalAtk}</span>
+                <span class="card-hp">❤${card.currentHp}</span>
+              </div>
             </div>
           `}).join('')
         : '<span class="field-placeholder">카드를 배치하세요</span>';
@@ -1575,17 +1595,88 @@
       // 적 필드
       const eField = document.getElementById('enemyField');
       eField.innerHTML = game.enemy.field.length > 0
-        ? game.enemy.field.map(card => `
-            <div class="field-card">
+        ? game.enemy.field.map((card, i) => `
+            <div class="field-card" data-enemy-index="${i}" data-card-id="${card.id}">
               <span class="icon">${card.icon}</span>
               <span class="name">${card.name}</span>
-              <span class="card-atk">⚔${card.attack}</span>
-              <span class="card-hp">❤${card.currentHp}</span>
+              <div class="card-stats-row">
+                <span class="card-atk">⚔${card.attack}</span>
+                <span class="card-hp">❤${card.currentHp}</span>
+              </div>
             </div>
           `).join('')
         : '<span class="field-placeholder">적 서버</span>';
 
       bindHandCardEvents();
+      bindFieldCardEvents();
+    }
+
+    // 필드 카드 길게 누르기 이벤트
+    function bindFieldCardEvents() {
+      document.querySelectorAll('.field-card[data-card-id]').forEach(el => {
+        let longPressTimer = null;
+        
+        const showInfo = () => {
+          const cardId = el.dataset.cardId;
+          const fieldIndex = el.dataset.fieldIndex;
+          const enemyIndex = el.dataset.enemyIndex;
+          
+          let card;
+          if (fieldIndex !== undefined) {
+            card = game.player.field[fieldIndex];
+          } else if (enemyIndex !== undefined) {
+            card = game.enemy.field[enemyIndex];
+          }
+          
+          if (!card) {
+            // 적 유닛은 allCards에서 찾기
+            card = allCards.find(c => c.id === cardId) || enemyCards[game.difficulty]?.find(c => c.id === cardId);
+          }
+          
+          if (card) showFieldCardInfo(card);
+        };
+        
+        el.addEventListener('touchstart', (e) => {
+          longPressTimer = setTimeout(showInfo, 400);
+        }, { passive: true });
+        
+        el.addEventListener('touchend', () => {
+          if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            // 짧은 탭이면 공격
+            const fieldIndex = el.dataset.fieldIndex;
+            if (fieldIndex !== undefined) {
+              attackWith(parseInt(fieldIndex));
+            }
+          }
+        });
+        
+        el.addEventListener('touchmove', () => {
+          clearTimeout(longPressTimer);
+        });
+        
+        // PC용 우클릭
+        el.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          showInfo();
+        });
+      });
+    }
+
+    // 필드 카드 정보 표시
+    function showFieldCardInfo(card) {
+      document.getElementById('gameCardIcon').textContent = card.icon;
+      document.getElementById('gameCardName').textContent = card.name;
+      document.getElementById('gameCardCategory').textContent = getCategoryName(card.category || 'attack');
+      document.getElementById('gameCardCost').textContent = card.cost || '-';
+      document.getElementById('gameCardHp').textContent = card.currentHp || card.hp;
+      document.getElementById('gameCardAtk').textContent = (card.attack || 0) + (card.bonusAtk || 0);
+      document.getElementById('gameCardDesc').textContent = card.desc || '적 유닛';
+      document.getElementById('gameCardEffect').textContent = '💡 ' + (card.effect || '공격 유닛');
+      document.getElementById('gameCardActions').innerHTML = `
+        <button class="btn btn-danger" onclick="closeGameCardModal()">닫기</button>
+      `;
+      document.getElementById('gameCardModal').classList.add('active');
     }
 
     // ========== 드래그 시스템 ==========
