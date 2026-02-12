@@ -520,6 +520,31 @@
       50% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.8); }
     }
 
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-50px); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px) rotate(-2deg); }
+      75% { transform: translateX(5px) rotate(2deg); }
+    }
+
+    .field-card.attacking {
+      animation: shake 0.3s ease-in-out;
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 5px rgba(0, 217, 255, 0.5); }
+      50% { box-shadow: 0 0 20px rgba(0, 217, 255, 1); }
+    }
+
+    .field-card.synergy {
+      animation: glow 2s infinite;
+      border-color: #00d9ff;
+    }
+
     .field-card .icon { font-size: 1.2em; }
     .field-card .name { font-size: 0.5em; }
 
@@ -907,9 +932,40 @@
       maxMana: 1,
       turnCount: 1,
       player: { hp: 100, maxHp: 100, field: [], hand: [], deck: [] },
-      enemy: { hp: 100, maxHp: 100, field: [] },
+      enemy: { hp: 100, maxHp: 100, field: [], mana: 0 },
       selectedCard: null,
-      selectedIndex: null
+      selectedIndex: null,
+      stats: { wins: 0, losses: 0, fastestWin: 999 },
+      combo: 0,
+      nextEnemyAttack: null
+    };
+
+    // 로컬 스토리지에서 통계 로드
+    try {
+      const saved = localStorage.getItem('serverDefenseStats');
+      if (saved) game.stats = JSON.parse(saved);
+    } catch(e) {}
+
+    function saveStats() {
+      try { localStorage.setItem('serverDefenseStats', JSON.stringify(game.stats)); } catch(e) {}
+    }
+
+    // 적 카드 (난이도별)
+    const enemyCards = {
+      easy: [
+        { id: 'bot1', name: '스팸봇', icon: '🤖', hp: 30, attack: 10 },
+        { id: 'bot2', name: '크롤러', icon: '🕷️', hp: 40, attack: 15 }
+      ],
+      normal: [
+        { id: 'bot1', name: '스팸봇', icon: '🤖', hp: 30, attack: 10 },
+        { id: 'bot2', name: '크롤러', icon: '🕷️', hp: 40, attack: 15 },
+        { id: 'bot3', name: '봇넷', icon: '👾', hp: 60, attack: 25 }
+      ],
+      hard: [
+        { id: 'bot2', name: '크롤러', icon: '🕷️', hp: 40, attack: 15 },
+        { id: 'bot3', name: '봇넷', icon: '👾', hp: 60, attack: 25 },
+        { id: 'bot4', name: 'APT', icon: '💀', hp: 80, attack: 35 }
+      ]
     };
 
     // ========== 도감 기능 ==========
@@ -966,18 +1022,30 @@
 
     // ========== 게임 기능 ==========
     function startGame(difficulty) {
+      const diffSettings = {
+        easy: { enemyHp: 80, atkMod: 0.8, spawnRate: 0.1 },
+        normal: { enemyHp: 100, atkMod: 1.0, spawnRate: 0.2 },
+        hard: { enemyHp: 120, atkMod: 1.3, spawnRate: 0.35 }
+      };
+      const settings = diffSettings[difficulty];
+
       game = {
+        ...game,
         started: true,
         turn: 'player',
         mana: 1,
         maxMana: 1,
         turnCount: 1,
         difficulty,
+        settings,
+        combo: 0,
+        nextEnemyAttack: null,
         player: { hp: 100, maxHp: 100, field: [], hand: [], deck: [] },
         enemy: { 
-          hp: difficulty === 'easy' ? 80 : difficulty === 'hard' ? 120 : 100,
-          maxHp: difficulty === 'easy' ? 80 : difficulty === 'hard' ? 120 : 100,
-          field: []
+          hp: settings.enemyHp,
+          maxHp: settings.enemyHp,
+          field: [],
+          mana: 0
         },
         selectedCard: null,
         selectedIndex: null
@@ -990,11 +1058,14 @@
       // 초기 핸드
       for (let i = 0; i < 4; i++) drawCard();
 
+      // Prometheus 효과: 다음 공격 미리보기
+      prepareNextEnemyAttack();
+
       document.body.classList.add('game-mode');
       document.getElementById('gameStart').style.display = 'none';
       document.getElementById('battleLog').style.display = 'block';
       updateBattleUI();
-      addLog('게임 시작!', 'info');
+      addLog(`🎮 ${difficulty.toUpperCase()} 모드 시작!`, 'info');
     }
 
     function exitGame() {
@@ -1056,12 +1127,85 @@
       if (card.cost > game.mana) return;
 
       game.mana -= card.cost;
-      game.player.field.push({ ...card, currentHp: card.hp, canAttack: false });
+      const newCard = { ...card, currentHp: card.hp, canAttack: false, bonusAtk: 0 };
+      
+      // Fargate 특수 효과: 배치 즉시 공격 가능
+      if (card.id === 'fargate') {
+        newCard.canAttack = true;
+        addLog(`🚀 Fargate 즉시 배치 완료!`, 'info');
+      }
+
+      game.player.field.push(newCard);
       game.player.hand.splice(game.selectedIndex, 1);
+      
+      // 시너지 효과 적용
+      applySynergyEffects();
       
       addLog(`${card.icon} ${card.name} 배치!`, 'info');
       closeGameCardModal();
       updateBattleUI();
+    }
+
+    // 시너지 효과 계산
+    function applySynergyEffects() {
+      const field = game.player.field;
+      const hasCard = (id) => field.some(c => c.id === id);
+      
+      field.forEach(card => {
+        card.bonusAtk = 0;
+        
+        // Route 53: 모든 카드 공격력 +5
+        if (hasCard('route53') && card.id !== 'route53') {
+          card.bonusAtk += 5;
+        }
+        
+        // Lambda + DynamoDB: Lambda 공격력 +15
+        if (card.id === 'lambda' && hasCard('dynamodb')) {
+          card.bonusAtk += 15;
+        }
+        
+        // Docker + K8s: Docker 공격력 +10
+        if (card.id === 'docker' && hasCard('k8s')) {
+          card.bonusAtk += 10;
+        }
+        
+        // EBS + EC2: EC2 HP +30 (한 번만)
+        if (card.id === 'ec2' && hasCard('ebs') && !card.ebsBoosted) {
+          card.currentHp = Math.min(card.hp + 30, card.currentHp + 30);
+          card.ebsBoosted = true;
+          addLog(`💾 EBS 연결! EC2 HP +30`, 'info');
+        }
+      });
+    }
+
+    // 데미지 감소 계산
+    function calculateDamageReduction(baseDmg, target) {
+      let dmg = baseDmg;
+      const field = game.player.field;
+      
+      // SSL/TLS: -5
+      if (field.some(c => c.id === 'ssl')) dmg -= 5;
+      
+      // VPC: -5
+      if (field.some(c => c.id === 'vpc')) dmg -= 5;
+      
+      // Redis + DB: DB 앞에 Redis 있으면 -30%
+      if (target && ['rds', 'dynamodb'].includes(target.id)) {
+        const redisIdx = field.findIndex(c => c.id === 'redis');
+        const targetIdx = field.findIndex(c => c.uid === target.uid);
+        if (redisIdx !== -1 && redisIdx < targetIdx) {
+          dmg = Math.floor(dmg * 0.7);
+          addLog(`🔴 Redis 캐시 보호! 데미지 -30%`, 'info');
+        }
+      }
+      
+      // ELB: 서버 2개 이상이면 데미지 분산 (50%)
+      if (field.some(c => c.id === 'elb') && field.filter(c => c.category === 'computing').length >= 2) {
+        dmg = Math.floor(dmg * 0.5);
+        addLog(`⚖️ ELB 부하 분산! 데미지 -50%`, 'info');
+      }
+      
+      return Math.max(0, dmg);
     }
 
     function attackWith(index) {
@@ -1069,22 +1213,67 @@
       if (!card || !card.canAttack || game.turn !== 'player') return;
 
       card.canAttack = false;
+      game.combo++;
+      
+      // 총 공격력 (기본 + 보너스 + 콤보)
+      const totalAtk = card.attack + (card.bonusAtk || 0) + (game.combo > 1 ? game.combo * 2 : 0);
+      
+      // 공격 애니메이션
+      showAttackAnimation(index, 'player');
 
       if (game.enemy.field.length > 0) {
         const target = game.enemy.field[0];
-        target.currentHp -= card.attack;
-        addLog(`${card.icon} → ${target.icon} (${card.attack})`, 'damage');
+        target.currentHp -= totalAtk;
+        
+        const comboText = game.combo > 1 ? ` (${game.combo}콤보!)` : '';
+        addLog(`${card.icon} → ${target.icon} (${totalAtk})${comboText}`, 'damage');
+        showDamageNumber(totalAtk, 'enemy');
+        
         if (target.currentHp <= 0) {
           game.enemy.field.shift();
           addLog(`${target.icon} 파괴!`, 'damage');
         }
       } else {
-        game.enemy.hp = Math.max(0, game.enemy.hp - card.attack);
-        addLog(`${card.icon} 직접 공격! (${card.attack})`, 'damage');
+        game.enemy.hp = Math.max(0, game.enemy.hp - totalAtk);
+        const comboText = game.combo > 1 ? ` (${game.combo}콤보!)` : '';
+        addLog(`${card.icon} 직접 공격! (${totalAtk})${comboText}`, 'damage');
+        showDamageNumber(totalAtk, 'enemy-hp');
       }
 
       checkGameOver();
       updateBattleUI();
+    }
+
+    // 공격 애니메이션
+    function showAttackAnimation(index, side) {
+      const field = document.getElementById(side === 'player' ? 'playerField' : 'enemyField');
+      const cards = field.querySelectorAll('.field-card');
+      if (cards[index]) {
+        cards[index].classList.add('attacking');
+        setTimeout(() => cards[index].classList.remove('attacking'), 300);
+      }
+    }
+
+    // 데미지 숫자 표시
+    function showDamageNumber(dmg, target) {
+      const el = document.createElement('div');
+      el.className = 'damage-number';
+      el.textContent = `-${dmg}`;
+      el.style.cssText = `
+        position: fixed;
+        top: ${target === 'enemy-hp' ? '15%' : '40%'};
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #e74c3c;
+        text-shadow: 0 0 10px #e74c3c;
+        animation: floatUp 1s forwards;
+        z-index: 1000;
+        pointer-events: none;
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1000);
     }
 
     function endTurn() {
@@ -1095,15 +1284,79 @@
       setTimeout(enemyTurn, 1000);
     }
 
-    function enemyTurn() {
+    // 적 공격 목록 준비
+    function prepareNextEnemyAttack() {
       const attacks = [
-        { name: 'DDoS', icon: '💥', dmg: 50 },
-        { name: '트래픽 스파이크', icon: '📈', dmg: 30 },
-        { name: 'SQL Injection', icon: '💉', dmg: 80, blockedBy: 'waf' },
-        { name: 'MITM 공격', icon: '👤', dmg: 40, blockedBy: 'ssl' }
+        { name: 'DDoS', icon: '💥', dmg: 50, type: 'normal' },
+        { name: '트래픽 스파이크', icon: '📈', dmg: 30, type: 'spike', blockedBy: 'cdn' },
+        { name: 'SQL Injection', icon: '💉', dmg: 80, type: 'sql', blockedBy: 'waf' },
+        { name: 'MITM 공격', icon: '👤', dmg: 40, type: 'mitm', blockedBy: 'ssl' },
+        { name: '권한 상승', icon: '👑', dmg: 60, type: 'priv', blockedBy: 'iam' },
+        { name: '데이터 유출', icon: '📤', dmg: 45, type: 'leak', blockedBy: 'kms' },
+        { name: '스텔스 공격', icon: '👻', dmg: 35, type: 'stealth', blockedBy: 'cloudwatch' }
       ];
-      const atk = attacks[Math.floor(Math.random() * attacks.length)];
+      
+      // 난이도별 공격력 조정
+      const mod = game.settings?.atkMod || 1;
+      game.nextEnemyAttack = attacks[Math.floor(Math.random() * attacks.length)];
+      game.nextEnemyAttack.dmg = Math.floor(game.nextEnemyAttack.dmg * mod);
+    }
 
+    function enemyTurn() {
+      game.enemy.mana++;
+      const settings = game.settings || { spawnRate: 0.2, atkMod: 1 };
+      
+      // 1. 적 유닛 배치 (난이도별 확률)
+      if (Math.random() < settings.spawnRate && game.enemy.mana >= 2) {
+        const cards = enemyCards[game.difficulty] || enemyCards.normal;
+        const card = cards[Math.floor(Math.random() * cards.length)];
+        game.enemy.field.push({ ...card, currentHp: card.hp });
+        game.enemy.mana -= 2;
+        addLog(`🚨 적 ${card.icon} ${card.name} 등장!`, 'damage');
+        updateBattleUI();
+      }
+
+      // 2. 적 유닛 공격
+      setTimeout(() => {
+        game.enemy.field.forEach(enemyCard => {
+          if (game.player.field.length > 0) {
+            const target = game.player.field[0];
+            const dmg = calculateDamageReduction(enemyCard.attack, target);
+            target.currentHp -= dmg;
+            addLog(`${enemyCard.icon} → ${target.icon} (${dmg})`, 'damage');
+            showDamageNumber(dmg, 'player');
+            
+            if (target.currentHp <= 0) {
+              handleCardDestruction(target, game.player.field);
+            }
+          } else {
+            game.player.hp = Math.max(0, game.player.hp - enemyCard.attack);
+            addLog(`${enemyCard.icon} 직접 공격! (${enemyCard.attack})`, 'damage');
+          }
+        });
+        
+        updateBattleUI();
+        checkGameOver();
+
+        // 3. 특수 공격 (prepared attack)
+        setTimeout(() => {
+          if (game.nextEnemyAttack) {
+            executeEnemyAttack(game.nextEnemyAttack);
+          }
+          prepareNextEnemyAttack();
+          
+          // Prometheus 효과: 다음 공격 미리보기
+          if (game.player.field.some(c => c.id === 'prometheus')) {
+            addLog(`📈 다음 공격 예고: ${game.nextEnemyAttack.icon} ${game.nextEnemyAttack.name}`, 'info');
+          }
+          
+          checkGameOver();
+          setTimeout(startPlayerTurn, 500);
+        }, 600);
+      }, 400);
+    }
+
+    function executeEnemyAttack(atk) {
       let dmg = atk.dmg;
       let blocked = false;
 
@@ -1114,35 +1367,60 @@
         blocked = true;
       }
 
-      // CDN 체크
-      if (atk.name === '트래픽 스파이크' && game.player.field.some(c => c.id === 'cdn')) {
-        addLog(`🌍 CDN이 스파이크 흡수!`, 'info');
-        blocked = true;
-      }
-
-      // 전역 데미지 감소
       if (!blocked) {
-        if (game.player.field.some(c => c.id === 'ssl')) dmg = Math.max(0, dmg - 5);
-        if (game.player.field.some(c => c.id === 'vpc')) dmg = Math.max(0, dmg - 5);
-      }
+        // 데미지 감소 적용
+        const target = game.player.field[0] || null;
+        dmg = calculateDamageReduction(dmg, target);
 
-      if (!blocked) {
         if (game.player.field.length > 0) {
-          const target = game.player.field[0];
           target.currentHp -= dmg;
           addLog(`${atk.icon} ${atk.name} → ${target.icon} (${dmg})`, 'damage');
+          showDamageNumber(dmg, 'player');
+          
           if (target.currentHp <= 0) {
-            game.player.field.shift();
-            addLog(`${target.icon} 파괴!`, 'damage');
+            handleCardDestruction(target, game.player.field);
           }
         } else {
           game.player.hp = Math.max(0, game.player.hp - dmg);
           addLog(`${atk.icon} ${atk.name}! (${dmg})`, 'damage');
+          showDamageNumber(dmg, 'player-hp');
         }
       }
+      
+      updateBattleUI();
+    }
 
-      checkGameOver();
-      setTimeout(startPlayerTurn, 500);
+    // 카드 파괴 처리 (특수 효과)
+    function handleCardDestruction(card, field) {
+      const idx = field.findIndex(c => c.uid === card.uid);
+      if (idx === -1) return;
+
+      // K8s: 50% 확률 부활
+      if (card.id === 'k8s' && Math.random() < 0.5) {
+        card.currentHp = Math.floor(card.hp * 0.3);
+        addLog(`☸️ K8s Pod 부활! (HP ${card.currentHp})`, 'info');
+        return;
+      }
+
+      // Terraform: 핸드에 복사본 추가
+      if (card.id === 'terraform' && game.player.hand.length < 7) {
+        const copy = allCards.find(c => c.id === 'terraform');
+        game.player.hand.push({ ...copy, uid: Date.now() + Math.random() });
+        addLog(`🏗️ Terraform IaC 재생성!`, 'info');
+      }
+
+      // S3: 모든 아군 HP +20
+      if (card.id === 's3') {
+        field.forEach(c => {
+          if (c.uid !== card.uid) {
+            c.currentHp = Math.min(c.hp, c.currentHp + 20);
+          }
+        });
+        addLog(`🪣 S3 백업 복원! 모든 아군 HP +20`, 'info');
+      }
+
+      field.splice(idx, 1);
+      addLog(`${card.icon} 파괴!`, 'damage');
     }
 
     function startPlayerTurn() {
@@ -1150,6 +1428,7 @@
       game.turnCount++;
       game.maxMana = Math.min(10, game.turnCount);
       game.mana = game.maxMana;
+      game.combo = 0; // 콤보 리셋
 
       drawCard();
 
@@ -1167,9 +1446,32 @@
         addLog('🔄 CI/CD 추가 드로우!', 'info');
       }
 
+      // 시너지 재계산
+      applySynergyEffects();
+
       game.player.field.forEach(c => c.canAttack = true);
       document.getElementById('endTurnBtn').disabled = false;
+      
+      // 5턴마다 이벤트
+      if (game.turnCount % 5 === 0) {
+        triggerRandomEvent();
+      }
+      
+      addLog(`--- 턴 ${game.turnCount} ---`, 'info');
       updateBattleUI();
+    }
+
+    // 랜덤 이벤트
+    function triggerRandomEvent() {
+      const events = [
+        { name: '트래픽 급증', effect: () => { game.enemy.hp = Math.max(0, game.enemy.hp - 15); addLog('📊 트래픽 급증! 적 서버 과부하 (-15 HP)', 'info'); }},
+        { name: '클라우드 크레딧', effect: () => { game.mana += 2; addLog('💰 클라우드 크레딧 지급! 마나 +2', 'info'); }},
+        { name: '보안 패치', effect: () => { game.player.field.forEach(c => c.currentHp = Math.min(c.hp, c.currentHp + 10)); addLog('🔒 보안 패치 적용! 모든 유닛 HP +10', 'info'); }},
+        { name: '오토스케일링', effect: () => { drawCard(); drawCard(); addLog('📈 오토스케일링! 카드 2장 드로우', 'info'); }}
+      ];
+      const event = events[Math.floor(Math.random() * events.length)];
+      addLog(`⚡ 이벤트: ${event.name}`, 'info');
+      event.effect();
     }
 
     function checkGameOver() {
@@ -1181,10 +1483,27 @@
     }
 
     function showGameOver(win) {
+      // 통계 업데이트
+      if (win) {
+        game.stats.wins++;
+        if (game.turnCount < game.stats.fastestWin) {
+          game.stats.fastestWin = game.turnCount;
+        }
+      } else {
+        game.stats.losses++;
+      }
+      saveStats();
+
       const el = document.getElementById('gameOver');
       el.className = 'game-over active ' + (win ? 'win' : 'lose');
+      
+      const statsText = `전적: ${game.stats.wins}승 ${game.stats.losses}패 | 최단 클리어: ${game.stats.fastestWin === 999 ? '-' : game.stats.fastestWin + '턴'}`;
+      
       document.getElementById('gameOverTitle').textContent = win ? '🎉 승리!' : '💀 패배';
-      document.getElementById('gameOverMsg').textContent = win ? '서버를 다운시켰습니다!' : '서버가 다운되었습니다...';
+      document.getElementById('gameOverMsg').innerHTML = `
+        ${win ? '서버를 다운시켰습니다!' : '서버가 다운되었습니다...'}<br>
+        <small style="color: #888;">${game.turnCount}턴 소요 | ${statsText}</small>
+      `;
     }
 
     function restartGame() {
@@ -1240,14 +1559,17 @@
       // 플레이어 필드
       const pField = document.getElementById('playerField');
       pField.innerHTML = game.player.field.length > 0
-        ? game.player.field.map((card, i) => `
-            <div class="field-card ${card.canAttack ? 'can-attack' : ''}" onclick="attackWith(${i})">
+        ? game.player.field.map((card, i) => {
+            const totalAtk = card.attack + (card.bonusAtk || 0);
+            const hasBonus = card.bonusAtk > 0;
+            return `
+            <div class="field-card ${card.canAttack ? 'can-attack' : ''} ${hasBonus ? 'synergy' : ''}" onclick="attackWith(${i})">
               <span class="icon">${card.icon}</span>
               <span class="name">${card.name}</span>
-              <span class="card-atk">⚔${card.attack}</span>
+              <span class="card-atk" ${hasBonus ? 'style="background:#f39c12"' : ''}>⚔${totalAtk}</span>
               <span class="card-hp">❤${card.currentHp}</span>
             </div>
-          `).join('')
+          `}).join('')
         : '<span class="field-placeholder">카드를 배치하세요</span>';
 
       // 적 필드
@@ -1379,8 +1701,20 @@
         const card = game.player.hand[dragState.cardIndex];
         if (card && card.cost <= game.mana) {
           game.mana -= card.cost;
-          game.player.field.push({ ...card, currentHp: card.hp, canAttack: false });
+          const newCard = { ...card, currentHp: card.hp, canAttack: false, bonusAtk: 0 };
+          
+          // Fargate 즉시 공격 가능
+          if (card.id === 'fargate') {
+            newCard.canAttack = true;
+            addLog(`🚀 Fargate 즉시 배치!`, 'info');
+          }
+          
+          game.player.field.push(newCard);
           game.player.hand.splice(dragState.cardIndex, 1);
+          
+          // 시너지 효과 적용
+          applySynergyEffects();
+          
           addLog(`${card.icon} ${card.name} 배치!`, 'info');
           updateBattleUI();
         }
