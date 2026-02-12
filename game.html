@@ -44,6 +44,7 @@
       position: fixed;
       width: 100%;
       height: 100%;
+      height: 100dvh;
     }
 
     body.game-mode .container {
@@ -53,7 +54,9 @@
       right: 0;
       bottom: 0;
       max-width: 100%;
-      padding: 5px;
+      padding: 3px;
+      padding-top: env(safe-area-inset-top, 3px);
+      padding-bottom: env(safe-area-inset-bottom, 3px);
       display: flex;
       flex-direction: column;
     }
@@ -294,42 +297,54 @@
       display: none;
       flex: 1;
       flex-direction: column;
-      gap: 5px;
+      gap: 3px;
+      min-height: 0;
+      overflow: hidden;
     }
 
     body.game-mode .battle-screen { display: flex; }
 
-    .enemy-area, .player-area {
+    .enemy-area {
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 3px;
+    }
+
+    .player-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-height: 0;
     }
 
     .status-bar {
+      flex: 0 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 12px;
+      padding: 4px 8px;
       background: rgba(0,0,0,0.4);
-      border-radius: 8px;
+      border-radius: 6px;
     }
 
     .player-info {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 6px;
     }
 
-    .player-icon { font-size: 1.2em; }
-    .player-name { font-weight: bold; font-size: 0.9em; }
+    .player-icon { font-size: 1em; }
+    .player-name { font-weight: bold; font-size: 0.75em; }
     .enemy-area .player-name { color: #ff6b6b; }
     .player-area .player-name { color: #4ecdc4; }
 
     .hp-bar {
-      width: 120px;
-      height: 18px;
+      width: 90px;
+      height: 14px;
       background: #333;
-      border-radius: 9px;
+      border-radius: 7px;
       overflow: hidden;
       position: relative;
     }
@@ -347,7 +362,7 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 0.75em;
+      font-size: 0.6em;
       font-weight: bold;
       text-shadow: 1px 1px 2px #000;
     }
@@ -355,11 +370,12 @@
     .mana-display {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       background: rgba(0, 150, 255, 0.3);
-      padding: 5px 12px;
-      border-radius: 12px;
+      padding: 3px 8px;
+      border-radius: 10px;
       font-weight: bold;
+      font-size: 0.8em;
     }
 
     .battle-field {
@@ -367,43 +383,45 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      min-height: 70px;
-      padding: 8px;
+      gap: 8px;
+      min-height: 50px;
+      padding: 5px;
       background: rgba(0,0,0,0.2);
-      border-radius: 8px;
+      border-radius: 6px;
     }
 
     .field-placeholder { color: #555; font-size: 0.8em; }
 
     .battle-divider {
+      flex: 0 0 auto;
       display: flex;
       align-items: center;
-      padding: 5px 0;
+      padding: 2px 0;
     }
 
     .divider-line {
       flex: 1;
-      height: 2px;
+      height: 1px;
       background: linear-gradient(90deg, transparent, #444, transparent);
     }
 
     .vs-badge {
-      padding: 4px 16px;
+      padding: 2px 10px;
       background: linear-gradient(135deg, #e74c3c, #c0392b);
-      border-radius: 12px;
-      font-size: 0.8em;
+      border-radius: 8px;
+      font-size: 0.65em;
       font-weight: bold;
-      margin: 0 10px;
+      margin: 0 8px;
     }
 
     /* 핸드 */
     .hand-area {
-      height: 100px;
+      flex: 0 0 auto;
+      height: 75px;
       display: flex;
       align-items: flex-end;
       justify-content: center;
-      padding-bottom: 5px;
+      padding-bottom: 3px;
     }
 
     .hand {
@@ -412,18 +430,18 @@
     }
 
     .hand-card {
-      width: 70px;
-      height: 90px;
+      width: 55px;
+      height: 70px;
       background: linear-gradient(145deg, #2a2a5a, #1a1a3e);
       border: 2px solid #444;
-      border-radius: 8px;
+      border-radius: 6px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all 0.2s;
-      margin: 0 -12px;
+      margin: 0 -10px;
       transform-origin: bottom center;
     }
 
@@ -446,37 +464,37 @@
 
     .hand-card .cost {
       position: absolute;
-      top: -8px;
-      right: -8px;
-      width: 24px;
-      height: 24px;
+      top: -6px;
+      right: -6px;
+      width: 18px;
+      height: 18px;
       background: linear-gradient(135deg, #3498db, #2980b9);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.8em;
+      font-size: 0.65em;
       font-weight: bold;
       border: 2px solid #fff;
     }
 
-    .hand-card .icon { font-size: 2em; }
-    .hand-card .name { font-size: 0.6em; margin-top: 3px; }
+    .hand-card .icon { font-size: 1.4em; }
+    .hand-card .name { font-size: 0.5em; margin-top: 2px; }
 
     .hand-card .card-stats {
       display: flex;
-      gap: 8px;
-      font-size: 0.6em;
-      margin-top: 3px;
+      gap: 5px;
+      font-size: 0.5em;
+      margin-top: 2px;
     }
 
     /* 필드 카드 */
     .field-card {
-      width: 60px;
-      height: 75px;
+      width: 50px;
+      height: 60px;
       background: linear-gradient(145deg, #2a2a5a, #1a1a3e);
       border: 2px solid #555;
-      border-radius: 8px;
+      border-radius: 6px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -502,28 +520,28 @@
       50% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.8); }
     }
 
-    .field-card .icon { font-size: 1.5em; }
-    .field-card .name { font-size: 0.55em; }
+    .field-card .icon { font-size: 1.2em; }
+    .field-card .name { font-size: 0.5em; }
 
     .field-card .card-hp {
       position: absolute;
-      bottom: 3px;
-      right: 3px;
+      bottom: 2px;
+      right: 2px;
       background: #27ae60;
-      padding: 2px 5px;
-      border-radius: 4px;
-      font-size: 0.55em;
+      padding: 1px 3px;
+      border-radius: 3px;
+      font-size: 0.45em;
       font-weight: bold;
     }
 
     .field-card .card-atk {
       position: absolute;
-      bottom: 3px;
-      left: 3px;
+      bottom: 2px;
+      left: 2px;
       background: #e74c3c;
-      padding: 2px 5px;
-      border-radius: 4px;
-      font-size: 0.55em;
+      padding: 1px 3px;
+      border-radius: 3px;
+      font-size: 0.45em;
       font-weight: bold;
     }
 
@@ -531,15 +549,15 @@
     .controls {
       display: flex;
       justify-content: center;
-      gap: 10px;
-      padding: 5px 0;
+      gap: 8px;
     }
 
     .btn {
-      padding: 10px 25px;
+      padding: 6px 16px;
       border: none;
-      border-radius: 20px;
+      border-radius: 15px;
       font-weight: bold;
+      font-size: 0.8em;
       cursor: pointer;
       transition: all 0.2s;
     }
@@ -585,14 +603,14 @@
     .battle-log {
       position: fixed;
       top: 50%;
-      left: 10px;
+      left: 5px;
       transform: translateY(-50%);
       background: rgba(0,0,0,0.7);
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 0.7em;
-      max-width: 140px;
-      max-height: 100px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.55em;
+      max-width: 100px;
+      max-height: 60px;
       overflow-y: auto;
       z-index: 50;
     }
