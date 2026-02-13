@@ -700,28 +700,21 @@
       border: 2px dashed #00ff88;
     }
 
-    /* 배틀 로그 - 화면 중앙 상단 */
+    /* 배틀 로그 - 가운데 영역에 인라인 */
     .battle-log {
-      position: fixed;
-      top: 45px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.85);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.7em;
-      max-width: 280px;
-      max-height: 50px;
+      background: rgba(0,0,0,0.6);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75em;
+      max-width: 200px;
+      max-height: 40px;
       overflow-y: auto;
-      z-index: 50;
-      border: 1px solid rgba(255,255,255,0.2);
       text-align: center;
     }
 
     .log-entry { 
-      padding: 2px 0; 
-      color: #ccc;
-      text-shadow: 0 0 5px rgba(0,0,0,0.5);
+      padding: 1px 0; 
+      color: #aaa;
     }
     .log-entry.damage { 
       color: #ff6b6b; 
@@ -824,9 +817,10 @@
         <div class="enemy-field" id="enemyField"></div>
       </div>
 
-      <!-- 가운데: VS + 마나 -->
+      <!-- 가운데: VS + 마나 + 로그 -->
       <div class="center-area">
-        <div class="vs-badge">⚔️ VS</div>
+        <div class="vs-badge">⚔️</div>
+        <div class="battle-log" id="battleLog"></div>
         <div class="mana-display">
           <span>⚡</span>
           <span id="manaText">1/1</span>
@@ -915,11 +909,6 @@
 
   <!-- 드래그 고스트 -->
   <div class="drag-ghost" id="dragGhost" style="display: none;"></div>
-
-  <!-- 배틀 로그 -->
-  <div class="battle-log" id="battleLog" style="display: none;">
-    <div class="log-entry info">게임 시작!</div>
-  </div>
 
   <!-- 게임 오버 -->
   <div class="game-over" id="gameOver">
