@@ -331,10 +331,10 @@
 
     .enemy-field {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       justify-content: center;
-      gap: 6px;
-      min-height: 50px;
+      gap: 5px;
+      min-height: auto;
       width: 100%;
     }
 
@@ -437,10 +437,10 @@
 
     .my-field {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       justify-content: center;
-      gap: 6px;
-      min-height: 50px;
+      gap: 5px;
+      min-height: auto;
       width: 100%;
     }
 
@@ -1256,6 +1256,10 @@
       if (game.selectedIndex === null) return;
       const card = game.player.hand[game.selectedIndex];
       if (card.cost > game.mana) return;
+      if (game.player.field.length >= 6) {
+        addLog('⚠️ 필드가 가득 찼습니다! (최대 6장)', 'info');
+        return;
+      }
 
       game.mana -= card.cost;
       const newCard = { ...card, currentHp: card.hp, canAttack: false, bonusAtk: 0 };
@@ -2129,6 +2133,10 @@
       const rect = field.getBoundingClientRect();
       if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
         const card = game.player.hand[dragState.cardIndex];
+        if (game.player.field.length >= 6) {
+          addLog('⚠️ 필드가 가득 찼습니다! (최대 6장)', 'info');
+          return;
+        }
         if (card && card.cost <= game.mana) {
           game.mana -= card.cost;
           const newCard = { ...card, currentHp: card.hp, canAttack: false, bonusAtk: 0 };
