@@ -334,7 +334,7 @@
       flex-wrap: nowrap;
       justify-content: center;
       gap: 5px;
-      min-height: auto;
+      min-height: 75px;
       width: 100%;
     }
 
@@ -388,12 +388,11 @@
 
     /* 가운데: VS + 로그 + 마나 */
     .center-area {
-      flex: 1;
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      padding: 10px 0;
-      min-height: 0;
+      gap: 5px;
+      padding: 5px 0;
     }
 
     .center-top {
@@ -440,7 +439,7 @@
       flex-wrap: nowrap;
       justify-content: center;
       gap: 5px;
-      min-height: auto;
+      min-height: 75px;
       width: 100%;
     }
 
@@ -750,14 +749,14 @@
       border: 2px dashed #00ff88;
     }
 
-    /* 배틀 로그 - 별도 영역 */
+    /* 배틀 로그 - 컴팩트 */
     .battle-log {
-      flex: 1;
+      flex: 0 0 auto;
       background: rgba(0,0,0,0.5);
-      padding: 8px 12px;
-      border-radius: 10px;
-      font-size: 0.85em;
-      max-height: 120px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.8em;
+      max-height: 80px;
       overflow-y: auto;
       border: 1px solid rgba(255,255,255,0.1);
     }
