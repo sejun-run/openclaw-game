@@ -446,16 +446,49 @@
 
     /* 하단 패널: 핸드 + 버튼 */
     .bottom-panel {
-      flex: 1;
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
-      gap: 10px;
+      align-items: center;
+      gap: 8px;
     }
 
     .hand-area {
       display: flex;
       justify-content: center;
+      width: 100%;
+    }
+
+    .controls-bar {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      width: 100%;
+      padding: 5px 0;
+    }
+
+    .controls-bar .btn {
+      flex: 1;
+      max-width: 150px;
+      padding: 12px 20px;
+      font-size: 1em;
+    }
+
+    /* 턴 종료 버튼 - 기본은 빛 안남 */
+    #endTurnBtn {
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      transition: all 0.3s;
+    }
+
+    /* 할 동작 없을 때만 빛나게 */
+    #endTurnBtn.highlight {
+      animation: btnPulse 1.5s infinite;
+      box-shadow: 0 0 20px rgba(46, 204, 113, 0.8);
+    }
+
+    @keyframes btnPulse {
+      0%, 100% { box-shadow: 0 0 10px rgba(46, 204, 113, 0.5); }
+      50% { box-shadow: 0 0 25px rgba(46, 204, 113, 1); }
     }
 
     /* 아바타 공격 대상 */
@@ -1698,6 +1731,29 @@
 
       bindHandCardEvents();
       bindFieldCardEvents();
+      updateEndTurnButton();
+    }
+
+    // 턴 종료 버튼 하이라이트 (할 동작 없을 때만)
+    function updateEndTurnButton() {
+      const btn = document.getElementById('endTurnBtn');
+      if (!btn || game.turn !== 'player') {
+        btn?.classList.remove('highlight');
+        return;
+      }
+
+      // 배치 가능한 카드 있는지
+      const canPlayCard = game.player.hand.some(c => c.cost <= game.mana);
+      
+      // 공격 가능한 카드 있는지
+      const canAttack = game.player.field.some(c => c.canAttack);
+      
+      // 둘 다 없으면 하이라이트
+      if (!canPlayCard && !canAttack) {
+        btn.classList.add('highlight');
+      } else {
+        btn.classList.remove('highlight');
+      }
     }
 
     // 필드 카드 이벤트 (탭=설명, 드래그=공격)
