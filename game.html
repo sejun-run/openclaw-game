@@ -302,21 +302,29 @@
     /* 전투 화면 - 세로 레이아웃 */
     .battle-screen {
       display: none;
-      width: 100%;
-      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       flex-direction: column;
       overflow: hidden;
-      padding: 5px;
+      padding: 8px;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
     }
 
     body.game-mode .battle-screen { display: flex; }
 
     /* 적 영역 (상단) */
     .enemy-side {
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 5px;
+      padding: 5px;
+      background: rgba(231, 76, 60, 0.1);
+      border-radius: 8px;
     }
 
     .enemy-field {
@@ -324,14 +332,11 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 5px;
-      min-height: 65px;
-      width: 100%;
+      min-height: 60px;
     }
 
     /* 아바타 (HP 표시) */
     .avatar {
-      width: 60px;
-      height: 50px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -339,7 +344,7 @@
       background: linear-gradient(145deg, #2a2a5a, #1a1a3e);
       border: 3px solid #ff6b6b;
       border-radius: 10px;
-      padding: 5px 10px;
+      padding: 6px 12px;
     }
 
     .avatar.player {
@@ -347,23 +352,24 @@
     }
 
     .avatar .icon {
-      font-size: 1.5em;
+      font-size: 1.3em;
     }
 
     .avatar .hp-info {
       display: flex;
       flex-direction: column;
       align-items: center;
+      gap: 2px;
     }
 
     .avatar .hp-text {
-      font-size: 0.9em;
+      font-size: 0.85em;
       font-weight: bold;
     }
 
     .avatar .hp-bar-mini {
-      width: 40px;
-      height: 5px;
+      width: 50px;
+      height: 6px;
       background: #333;
       border-radius: 3px;
       overflow: hidden;
@@ -381,18 +387,19 @@
 
     /* 가운데: VS + 마나 */
     .center-area {
+      flex: 0 0 auto;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 15px;
-      padding: 5px 0;
+      gap: 20px;
+      padding: 8px 0;
     }
 
     .vs-badge {
-      padding: 5px 15px;
+      padding: 4px 12px;
       background: linear-gradient(135deg, #e74c3c, #c0392b);
-      border-radius: 15px;
-      font-size: 0.9em;
+      border-radius: 12px;
+      font-size: 0.8em;
       font-weight: bold;
     }
 
@@ -400,19 +407,23 @@
       display: flex;
       align-items: center;
       gap: 4px;
-      background: rgba(0, 150, 255, 0.3);
-      padding: 5px 10px;
+      background: rgba(0, 150, 255, 0.4);
+      padding: 4px 10px;
       border-radius: 10px;
       font-weight: bold;
-      font-size: 0.9em;
+      font-size: 0.85em;
     }
 
-    /* 내 영역 (하단) */
+    /* 내 영역 */
     .my-side {
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 5px;
+      padding: 5px;
+      background: rgba(78, 205, 196, 0.1);
+      border-radius: 8px;
     }
 
     .my-field {
@@ -420,23 +431,23 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 5px;
-      min-height: 65px;
-      width: 100%;
+      min-height: 60px;
     }
 
     /* 하단 패널: 핸드 + 버튼 */
     .bottom-panel {
-      margin-top: auto;
+      flex: 1;
       display: flex;
       align-items: flex-end;
+      justify-content: center;
       gap: 10px;
-      padding-bottom: max(3px, env(safe-area-inset-bottom));
     }
 
     .hand-area {
       flex: 1;
       display: flex;
       justify-content: center;
+      max-width: 80%;
     }
 
     .controls-bar {
