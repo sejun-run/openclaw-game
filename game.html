@@ -491,7 +491,15 @@
       50% { box-shadow: 0 0 25px rgba(46, 204, 113, 1); }
     }
 
-    /* 아바타 공격 대상 */
+    /* 공격 중인 카드 */
+    .field-card.attacking-source {
+      border-color: #f1c40f !important;
+      box-shadow: 0 0 20px rgba(241, 196, 15, 0.8);
+      transform: scale(1.1);
+    }
+
+    /* 공격 대상 */
+    .field-card.attack-target,
     .avatar.attack-target {
       animation: targetPulse 0.5s infinite;
       border-color: #e74c3c !important;
@@ -550,7 +558,8 @@
     .hand-card .cost {
       position: absolute;
       top: -8px;
-      right: -8px;
+      left: 50%;
+      transform: translateX(-50%);
       width: 22px;
       height: 22px;
       background: linear-gradient(135deg, #3498db, #2980b9);
@@ -561,6 +570,7 @@
       font-size: 0.75em;
       font-weight: bold;
       border: 2px solid #fff;
+      z-index: 10;
     }
 
     .hand-card .icon { font-size: 1.8em; }
@@ -1786,6 +1796,7 @@
           if (dx > 10 || dy > 10) {
             moved = true;
             attackDragState.active = true;
+            el.classList.add('attacking-source');
             showAttackTargets();
             updateAttackArrow(touch.clientX, touch.clientY);
           }
@@ -1804,6 +1815,7 @@
             executeAttackOnTarget(fieldIndex, touch.clientX, touch.clientY);
           }
           
+          el.classList.remove('attacking-source');
           hideAttackTargets();
           attackDragState = { active: false, cardIndex: null, startX: 0, startY: 0 };
         });
@@ -1870,6 +1882,17 @@
       arrow.style.display = 'block';
       arrow.style.left = x + 'px';
       arrow.style.top = y + 'px';
+
+      // 타겟 하이라이트 업데이트
+      document.querySelectorAll('.field-card.attack-target').forEach(el => el.classList.remove('attack-target'));
+      
+      // 적 카드 위에 있으면 하이라이트
+      document.querySelectorAll('#enemyField .field-card').forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+          el.classList.add('attack-target');
+        }
+      });
     }
 
     function executeAttackOnTarget(attackerIndex, x, y) {
