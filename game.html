@@ -570,39 +570,47 @@
       50% { box-shadow: 0 0 25px rgba(231, 76, 60, 1); }
     }
 
-    .field-card .icon { font-size: 1.3em; line-height: 1; }
+    .field-card .icon { font-size: 1.4em; line-height: 1; }
     .field-card .name { 
-      font-size: 0.45em; 
+      font-size: 0.4em; 
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      margin-top: 2px;
-    }
-
-    .field-card .card-stats-row {
-      position: absolute;
-      bottom: 2px;
-      left: 2px;
-      right: 2px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .field-card .card-hp {
-      background: #27ae60;
-      padding: 1px 4px;
-      border-radius: 3px;
-      font-size: 0.5em;
-      font-weight: bold;
+      margin-top: 1px;
+      opacity: 0.8;
     }
 
     .field-card .card-atk {
-      background: #e74c3c;
-      padding: 1px 4px;
-      border-radius: 3px;
-      font-size: 0.5em;
+      position: absolute;
+      bottom: -4px;
+      left: -4px;
+      width: 18px;
+      height: 18px;
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      border-radius: 50%;
+      font-size: 0.55em;
       font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #1a1a2e;
+    }
+
+    .field-card .card-hp {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      width: 18px;
+      height: 18px;
+      background: linear-gradient(135deg, #27ae60, #1e8449);
+      border-radius: 50%;
+      font-size: 0.55em;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #1a1a2e;
     }
 
     /* 컨트롤 버튼 */
@@ -1610,10 +1618,8 @@
                  data-field-index="${i}" data-card-id="${card.id}">
               <span class="icon">${card.icon}</span>
               <span class="name">${card.name}</span>
-              <div class="card-stats-row">
-                <span class="card-atk" ${hasBonus ? 'style="background:#f39c12"' : ''}>⚔${totalAtk}</span>
-                <span class="card-hp">❤${card.currentHp}</span>
-              </div>
+              <span class="card-atk" ${hasBonus ? 'style="background:linear-gradient(135deg,#f39c12,#d68910)"' : ''}>${totalAtk}</span>
+              <span class="card-hp">${card.currentHp}</span>
             </div>
           `}).join('')
         : '<span class="field-placeholder">카드를 배치하세요</span>';
@@ -1625,10 +1631,8 @@
             <div class="field-card" data-enemy-index="${i}" data-card-id="${card.id}">
               <span class="icon">${card.icon}</span>
               <span class="name">${card.name}</span>
-              <div class="card-stats-row">
-                <span class="card-atk">⚔${card.attack}</span>
-                <span class="card-hp">❤${card.currentHp}</span>
-              </div>
+              <span class="card-atk">${card.attack}</span>
+              <span class="card-hp">${card.currentHp}</span>
             </div>
           `).join('')
         : '<span class="field-placeholder">적 서버</span>';
