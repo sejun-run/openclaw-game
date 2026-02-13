@@ -314,14 +314,8 @@
     .my-side {
       flex: 1;
       display: flex;
-      flex-direction: column;
-      padding: 5px;
-      gap: 5px;
-    }
-
-    .my-status {
-      display: flex;
       align-items: center;
+      padding: 5px;
       gap: 8px;
     }
 
@@ -330,13 +324,60 @@
       display: flex;
       flex-wrap: wrap;
       align-content: center;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 5px;
       background: rgba(78, 205, 196, 0.1);
       border: 2px solid rgba(78, 205, 196, 0.3);
       border-radius: 8px;
-      padding: 5px;
-      min-height: 70px;
+      padding: 8px;
+      min-height: 80px;
+    }
+
+    /* 아바타 (HP 표시) */
+    .avatar {
+      width: 55px;
+      height: 70px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(145deg, #2a2a5a, #1a1a3e);
+      border: 3px solid #4ecdc4;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .avatar.enemy {
+      border-color: #ff6b6b;
+    }
+
+    .avatar .icon {
+      font-size: 1.8em;
+    }
+
+    .avatar .hp-text {
+      font-size: 0.7em;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+
+    .avatar .hp-bar-mini {
+      width: 45px;
+      height: 6px;
+      background: #333;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 3px;
+    }
+
+    .avatar .hp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #27ae60, #2ecc71);
+      transition: width 0.3s;
+    }
+
+    .avatar .hp-fill.low {
+      background: linear-gradient(90deg, #c0392b, #e74c3c);
     }
 
     /* 가운데: VS + 정보 */
@@ -372,15 +413,8 @@
     .enemy-side {
       flex: 1;
       display: flex;
-      flex-direction: column;
-      padding: 5px;
-      gap: 5px;
-    }
-
-    .enemy-status {
-      display: flex;
       align-items: center;
-      justify-content: flex-end;
+      padding: 5px;
       gap: 8px;
     }
 
@@ -389,13 +423,13 @@
       display: flex;
       flex-wrap: wrap;
       align-content: center;
-      justify-content: center;
+      justify-content: flex-end;
       gap: 5px;
       background: rgba(231, 76, 60, 0.1);
       border: 2px solid rgba(231, 76, 60, 0.3);
       border-radius: 8px;
-      padding: 5px;
-      min-height: 70px;
+      padding: 8px;
+      min-height: 80px;
     }
 
     /* 하단 핸드 + 버튼 */
@@ -441,8 +475,10 @@
       border-color: #4ecdc4;
     }
     
-    #enemyHpBar {
-      border-color: #ff6b6b;
+    /* 아바타 공격 대상 */
+    .avatar.attack-target {
+      animation: targetPulse 0.5s infinite;
+      border-color: #e74c3c !important;
     }
 
     .hp-fill {
@@ -839,11 +875,11 @@
     <div class="battle-screen" id="battleScreen">
       <!-- 왼쪽: 내 영역 -->
       <div class="my-side">
-        <div class="my-status">
-          <span class="player-icon">👤</span>
-          <div class="hp-bar player-hp" id="playerHpBar">
+        <div class="avatar" id="playerAvatar">
+          <span class="icon">👤</span>
+          <span class="hp-text" id="playerHpText">100</span>
+          <div class="hp-bar-mini">
             <div class="hp-fill" id="playerHpFill"></div>
-            <span class="hp-text" id="playerHpText">100/100</span>
           </div>
         </div>
         <div class="my-field" id="playerField">
@@ -862,15 +898,15 @@
 
       <!-- 오른쪽: 적 영역 -->
       <div class="enemy-side">
-        <div class="enemy-status">
-          <div class="hp-bar" id="enemyHpBar">
-            <div class="hp-fill" id="enemyHpFill"></div>
-            <span class="hp-text" id="enemyHpText">100/100</span>
-          </div>
-          <span class="player-icon">🤖</span>
-        </div>
         <div class="enemy-field" id="enemyField">
           <span class="field-placeholder">적 서버</span>
+        </div>
+        <div class="avatar enemy" id="enemyAvatar">
+          <span class="icon">🤖</span>
+          <span class="hp-text" id="enemyHpText">100</span>
+          <div class="hp-bar-mini">
+            <div class="hp-fill" id="enemyHpFill"></div>
+          </div>
         </div>
       </div>
 
@@ -1657,17 +1693,17 @@
     }
 
     function updateBattleUI() {
-      // HP
+      // HP (아바타에 숫자만 표시)
       const pPct = (game.player.hp / game.player.maxHp) * 100;
       const ePct = (game.enemy.hp / game.enemy.maxHp) * 100;
       
       document.getElementById('playerHpFill').style.width = pPct + '%';
       document.getElementById('playerHpFill').className = 'hp-fill' + (pPct < 30 ? ' low' : '');
-      document.getElementById('playerHpText').textContent = `${game.player.hp}/${game.player.maxHp}`;
+      document.getElementById('playerHpText').textContent = game.player.hp;
       
       document.getElementById('enemyHpFill').style.width = ePct + '%';
       document.getElementById('enemyHpFill').className = 'hp-fill' + (ePct < 30 ? ' low' : '');
-      document.getElementById('enemyHpText').textContent = `${game.enemy.hp}/${game.enemy.maxHp}`;
+      document.getElementById('enemyHpText').textContent = game.enemy.hp;
 
       document.getElementById('manaText').textContent = `${game.mana}/${game.maxMana}`;
 
@@ -1811,7 +1847,7 @@
       document.querySelectorAll('#enemyField .field-card').forEach(el => {
         el.classList.add('attack-target');
       });
-      document.getElementById('enemyHpBar')?.classList.add('attack-target');
+      document.getElementById('enemyAvatar')?.classList.add('attack-target');
     }
 
     function hideAttackTargets() {
@@ -1856,7 +1892,7 @@
       }
 
       // 적 HP 직접 공격 체크
-      const hpBar = document.getElementById('enemyHpBar');
+      const hpBar = document.getElementById('enemyAvatar');
       if (hpBar) {
         const rect = hpBar.getBoundingClientRect();
         if (x >= rect.left - 50 && x <= rect.right + 50 && y >= rect.top - 30 && y <= rect.bottom + 30) {
