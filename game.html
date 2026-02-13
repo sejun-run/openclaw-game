@@ -299,75 +299,74 @@
     .diff-btn h3 { margin-bottom: 5px; }
     .diff-btn p { font-size: 0.85em; color: #888; margin: 0; }
 
-    /* 전투 화면 - 가로 활용 레이아웃 */
+    /* 전투 화면 - 세로 레이아웃 */
     .battle-screen {
       display: none;
       width: 100%;
       height: 100%;
-      flex-direction: row;
+      flex-direction: column;
       overflow: hidden;
+      padding: 5px;
     }
 
     body.game-mode .battle-screen { display: flex; }
 
-    /* 왼쪽: 내 영역 */
-    .my-side {
-      flex: 1;
+    /* 적 영역 (상단) */
+    .enemy-side {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      padding: 5px;
-      gap: 8px;
+      gap: 5px;
     }
 
-    .my-field {
-      flex: 1;
+    .enemy-field {
       display: flex;
       flex-wrap: wrap;
-      align-content: center;
-      justify-content: flex-start;
+      justify-content: center;
       gap: 5px;
-      background: rgba(78, 205, 196, 0.1);
-      border: 2px solid rgba(78, 205, 196, 0.3);
-      border-radius: 8px;
-      padding: 8px;
-      min-height: 80px;
+      min-height: 65px;
+      width: 100%;
     }
 
     /* 아바타 (HP 표시) */
     .avatar {
-      width: 55px;
-      height: 70px;
+      width: 60px;
+      height: 50px;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 8px;
       background: linear-gradient(145deg, #2a2a5a, #1a1a3e);
-      border: 3px solid #4ecdc4;
-      border-radius: 8px;
-      flex-shrink: 0;
+      border: 3px solid #ff6b6b;
+      border-radius: 10px;
+      padding: 5px 10px;
     }
 
-    .avatar.enemy {
-      border-color: #ff6b6b;
+    .avatar.player {
+      border-color: #4ecdc4;
     }
 
     .avatar .icon {
-      font-size: 1.8em;
+      font-size: 1.5em;
+    }
+
+    .avatar .hp-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .avatar .hp-text {
-      font-size: 0.7em;
+      font-size: 0.9em;
       font-weight: bold;
-      margin-top: 4px;
     }
 
     .avatar .hp-bar-mini {
-      width: 45px;
-      height: 6px;
+      width: 40px;
+      height: 5px;
       background: #333;
       border-radius: 3px;
       overflow: hidden;
-      margin-top: 3px;
     }
 
     .avatar .hp-fill {
@@ -380,21 +379,20 @@
       background: linear-gradient(90deg, #c0392b, #e74c3c);
     }
 
-    /* 가운데: VS + 정보 */
+    /* 가운데: VS + 마나 */
     .center-area {
-      flex: 0 0 60px;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 15px;
+      padding: 5px 0;
     }
 
     .vs-badge {
-      padding: 8px 12px;
+      padding: 5px 15px;
       background: linear-gradient(135deg, #e74c3c, #c0392b);
-      border-radius: 50%;
-      font-size: 1em;
+      border-radius: 15px;
+      font-size: 0.9em;
       font-weight: bold;
     }
 
@@ -403,63 +401,49 @@
       align-items: center;
       gap: 4px;
       background: rgba(0, 150, 255, 0.3);
-      padding: 4px 8px;
+      padding: 5px 10px;
       border-radius: 10px;
       font-weight: bold;
       font-size: 0.9em;
     }
 
-    /* 오른쪽: 적 영역 */
-    .enemy-side {
-      flex: 1;
+    /* 내 영역 (하단) */
+    .my-side {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      padding: 5px;
-      gap: 8px;
+      gap: 5px;
     }
 
-    .enemy-field {
-      flex: 1;
+    .my-field {
       display: flex;
       flex-wrap: wrap;
-      align-content: center;
-      justify-content: flex-end;
+      justify-content: center;
       gap: 5px;
-      background: rgba(231, 76, 60, 0.1);
-      border: 2px solid rgba(231, 76, 60, 0.3);
-      border-radius: 8px;
-      padding: 8px;
-      min-height: 80px;
+      min-height: 65px;
+      width: 100%;
     }
 
-    /* 하단 핸드 + 버튼 */
+    /* 하단 패널: 핸드 + 버튼 */
     .bottom-panel {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      margin-top: auto;
       display: flex;
       align-items: flex-end;
-      justify-content: space-between;
-      padding: 5px 10px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.8));
-      padding-bottom: max(5px, env(safe-area-inset-bottom));
+      gap: 10px;
+      padding-bottom: max(3px, env(safe-area-inset-bottom));
     }
 
     .hand-area {
       flex: 1;
       display: flex;
       justify-content: center;
-      max-width: 70%;
     }
 
     .controls-bar {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 4px;
     }
-
-    .player-icon { font-size: 1.2em; }
 
     .hp-bar {
       width: 100px;
@@ -871,41 +855,45 @@
       </div>
     </div>
 
-    <!-- 전투 화면 - 가로 활용 레이아웃 -->
+    <!-- 전투 화면 - 세로 레이아웃 -->
     <div class="battle-screen" id="battleScreen">
-      <!-- 왼쪽: 내 영역 -->
-      <div class="my-side">
-        <div class="avatar" id="playerAvatar">
-          <span class="icon">👤</span>
-          <span class="hp-text" id="playerHpText">100</span>
-          <div class="hp-bar-mini">
-            <div class="hp-fill" id="playerHpFill"></div>
+      <!-- 적 영역 (상단) -->
+      <div class="enemy-side">
+        <div class="avatar" id="enemyAvatar">
+          <span class="icon">🤖</span>
+          <div class="hp-info">
+            <span class="hp-text" id="enemyHpText">100</span>
+            <div class="hp-bar-mini">
+              <div class="hp-fill" id="enemyHpFill"></div>
+            </div>
           </div>
         </div>
-        <div class="my-field" id="playerField">
-          <span class="field-placeholder">카드 배치</span>
+        <div class="enemy-field" id="enemyField">
+          <span class="field-placeholder">적 서버</span>
         </div>
       </div>
 
-      <!-- 가운데 -->
+      <!-- 가운데: VS + 마나 -->
       <div class="center-area">
-        <div class="vs-badge">⚔️</div>
+        <div class="vs-badge">⚔️ VS</div>
         <div class="mana-display">
           <span>⚡</span>
           <span id="manaText">1/1</span>
         </div>
       </div>
 
-      <!-- 오른쪽: 적 영역 -->
-      <div class="enemy-side">
-        <div class="enemy-field" id="enemyField">
-          <span class="field-placeholder">적 서버</span>
+      <!-- 내 영역 -->
+      <div class="my-side">
+        <div class="my-field" id="playerField">
+          <span class="field-placeholder">카드 배치</span>
         </div>
-        <div class="avatar enemy" id="enemyAvatar">
-          <span class="icon">🤖</span>
-          <span class="hp-text" id="enemyHpText">100</span>
-          <div class="hp-bar-mini">
-            <div class="hp-fill" id="enemyHpFill"></div>
+        <div class="avatar player" id="playerAvatar">
+          <span class="icon">👤</span>
+          <div class="hp-info">
+            <span class="hp-text" id="playerHpText">100</span>
+            <div class="hp-bar-mini">
+              <div class="hp-fill" id="playerHpFill"></div>
+            </div>
           </div>
         </div>
       </div>
