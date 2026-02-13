@@ -1066,9 +1066,9 @@
     // ========== 게임 기능 ==========
     function startGame(difficulty) {
       const diffSettings = {
-        easy: { enemyHp: 100, playerHp: 100, atkMod: 1.0, spawnRate: 0.25, autoDraw: true, manaRate: 1 },
-        normal: { enemyHp: 120, playerHp: 80, atkMod: 1.2, spawnRate: 0.4, autoDraw: false, manaRate: 1 },
-        hard: { enemyHp: 150, playerHp: 70, atkMod: 1.5, spawnRate: 0.5, autoDraw: false, manaRate: 0.5 }
+        easy: { enemyHp: 100, playerHp: 100, atkMod: 1.0, spawnRate: 0.2, drawRate: 1, doubleAttack: false },
+        normal: { enemyHp: 130, playerHp: 80, atkMod: 1.3, spawnRate: 0.35, drawRate: 1, doubleAttack: false },
+        hard: { enemyHp: 160, playerHp: 60, atkMod: 1.5, spawnRate: 0.5, drawRate: 0.5, doubleAttack: true }
       };
       const settings = diffSettings[difficulty];
 
@@ -1386,17 +1386,32 @@
           if (game.nextEnemyAttack) {
             executeEnemyAttack(game.nextEnemyAttack);
           }
-          prepareNextEnemyAttack();
           
-          // Prometheus 효과: 다음 공격 미리보기
-          if (game.player.field.some(c => c.id === 'prometheus')) {
-            addLog(`📈 다음 공격 예고: ${game.nextEnemyAttack.icon} ${game.nextEnemyAttack.name}`, 'info');
+          // Hard 모드: 2번째 공격
+          if (game.settings.doubleAttack && game.turnCount > 3) {
+            prepareNextEnemyAttack();
+            setTimeout(() => {
+              addLog(`⚠️ 연속 공격!`, 'damage');
+              executeEnemyAttack(game.nextEnemyAttack);
+              finishEnemyTurn();
+            }, 400);
+          } else {
+            finishEnemyTurn();
           }
-          
-          checkGameOver();
-          setTimeout(startPlayerTurn, 500);
         }, 600);
       }, 400);
+    }
+
+    function finishEnemyTurn() {
+      prepareNextEnemyAttack();
+      
+      // Prometheus 효과: 다음 공격 미리보기
+      if (game.player.field.some(c => c.id === 'prometheus')) {
+        addLog(`📈 다음 공격 예고: ${game.nextEnemyAttack.icon} ${game.nextEnemyAttack.name}`, 'info');
+      }
+      
+      checkGameOver();
+      setTimeout(startPlayerTurn, 500);
     }
 
     function executeEnemyAttack(atk) {
@@ -1470,17 +1485,16 @@
       game.turn = 'player';
       game.turnCount++;
       
-      // 마나 증가 (난이도별)
-      const manaIncrease = game.settings.manaRate === 1 ? 1 : (game.turnCount % 2 === 0 ? 1 : 0);
-      game.maxMana = Math.min(10, game.maxMana + manaIncrease);
+      // 마나 증가
+      game.maxMana = Math.min(10, game.turnCount);
       game.mana = game.maxMana;
       game.combo = 0; // 콤보 리셋
 
-      // 자동 드로우 (난이도별)
-      if (game.settings.autoDraw) {
+      // 드로우 (hard는 2턴에 1장)
+      if (game.settings.drawRate === 1 || game.turnCount % 2 === 1) {
         drawCard();
       } else {
-        addLog(`⚠️ 자동 드로우 없음! CI/CD 필요`, 'info');
+        addLog(`⚠️ 이번 턴 드로우 없음`, 'info');
       }
 
       // RDS 회복
