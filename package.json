@@ -1,0 +1,11 @@
+{
+  "name": "infra-master",
+  "version": "1.0.0",
+  "description": "인프라 카드게임",
+  "scripts": {
+    "ui-check": "node scripts/ui-check.js"
+  },
+  "devDependencies": {
+    "puppeteer": "^24.37.2"
+  }
+}
