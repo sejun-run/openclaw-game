@@ -805,6 +805,163 @@
       .hand-card { width: 60px; height: 80px; margin: 0 -10px; }
       .hand-card .icon { font-size: 1.6em; }
     }
+
+    /* ========== 튜토리얼 스타일 ========== */
+    .tutorial-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .tutorial-overlay.active { display: flex; }
+
+    .tutorial-box {
+      background: linear-gradient(145deg, #2a2a5a, #1a1a3e);
+      border: 2px solid #00d9ff;
+      border-radius: 15px;
+      padding: 25px;
+      max-width: 350px;
+      width: 100%;
+      text-align: center;
+      animation: tutorialPop 0.3s ease-out;
+    }
+
+    @keyframes tutorialPop {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .tutorial-box h3 {
+      color: #00d9ff;
+      margin-bottom: 15px;
+      font-size: 1.3em;
+    }
+
+    .tutorial-box p {
+      color: #ccc;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .tutorial-box .step-indicator {
+      color: #888;
+      font-size: 0.85em;
+      margin-bottom: 15px;
+    }
+
+    .tutorial-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .tutorial-highlight {
+      position: relative;
+      z-index: 3001;
+      animation: tutorialGlow 1s infinite;
+    }
+
+    @keyframes tutorialGlow {
+      0%, 100% { box-shadow: 0 0 10px #00d9ff, 0 0 20px #00d9ff; }
+      50% { box-shadow: 0 0 20px #00d9ff, 0 0 40px #00d9ff; }
+    }
+
+    .tutorial-arrow {
+      position: fixed;
+      font-size: 2em;
+      color: #00d9ff;
+      z-index: 3002;
+      animation: bounce 1s infinite;
+      text-shadow: 0 0 10px #00d9ff;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* 도움말 버튼 */
+    .help-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #00d9ff, #00ff88);
+      border: none;
+      border-radius: 50%;
+      color: #000;
+      font-size: 1.5em;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 2500;
+      box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+      display: none;
+    }
+
+    body.game-mode .help-btn { display: flex; justify-content: center; align-items: center; }
+
+    .help-btn:active { transform: scale(0.95); }
+
+    /* 도움말 모달 */
+    .help-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 2600;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+
+    .help-modal.active { display: flex; }
+
+    .help-content {
+      background: linear-gradient(145deg, #2a2a5a, #1a1a3e);
+      border-radius: 15px;
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .help-content h3 {
+      color: #00d9ff;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .help-section {
+      margin-bottom: 20px;
+    }
+
+    .help-section h4 {
+      color: #00ff88;
+      margin-bottom: 10px;
+      font-size: 1em;
+    }
+
+    .help-section ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .help-section li {
+      color: #ccc;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.9em;
+    }
+
+    .help-section li:last-child { border-bottom: none; }
+
+    .help-section li strong { color: #fff; }
   </style>
 </head>
 <body>
@@ -854,6 +1011,9 @@
             <p>도전!</p>
           </div>
         </div>
+        <p style="margin-top: 20px; color: #666; font-size: 0.9em;">
+          <span onclick="resetTutorial()" style="cursor: pointer; text-decoration: underline;">📖 튜토리얼 다시 보기</span>
+        </p>
       </div>
     </div>
 
@@ -974,6 +1134,77 @@
       <h2 id="gameOverTitle">승리!</h2>
       <p id="gameOverMsg">상대 서버를 다운시켰습니다!</p>
       <button class="btn btn-primary" onclick="restartGame()">다시 하기</button>
+    </div>
+  </div>
+
+  <!-- 튜토리얼 오버레이 -->
+  <div class="tutorial-overlay" id="tutorialOverlay">
+    <div class="tutorial-box">
+      <div class="step-indicator" id="tutorialStep">1/5</div>
+      <h3 id="tutorialTitle">🎮 서버 디펜스에 오신 것을 환영합니다!</h3>
+      <p id="tutorialText">인프라 카드를 배치하고 적의 공격으로부터 서버를 지키세요!</p>
+      <div class="tutorial-buttons">
+        <button class="btn btn-back" id="tutorialSkip" onclick="skipTutorial()">건너뛰기</button>
+        <button class="btn btn-primary" id="tutorialNext" onclick="nextTutorialStep()">다음</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 도움말 버튼 -->
+  <button class="help-btn" id="helpBtn" onclick="toggleHelp()">?</button>
+
+  <!-- 도움말 모달 -->
+  <div class="help-modal" id="helpModal" onclick="closeHelp(event)">
+    <div class="help-content" onclick="event.stopPropagation()">
+      <h3>📖 게임 도움말</h3>
+      
+      <div class="help-section">
+        <h4>🎯 목표</h4>
+        <ul>
+          <li>적 서버의 <strong>HP를 0</strong>으로 만들면 승리!</li>
+          <li>내 서버 HP가 0이 되면 패배</li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <h4>🃏 카드 조작</h4>
+        <ul>
+          <li><strong>탭/클릭</strong> → 카드 상세 정보</li>
+          <li><strong>드래그</strong> → 핸드 카드를 필드에 배치</li>
+          <li><strong>필드 카드 드래그</strong> → 적에게 공격</li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <h4>⚡ 마나 시스템</h4>
+        <ul>
+          <li>매턴 최대 마나가 <strong>+1</strong> 증가 (최대 10)</li>
+          <li>카드 배치에 마나 소모</li>
+          <li>마나 부족 시 카드 배치 불가</li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <h4>⚔️ 전투</h4>
+        <ul>
+          <li>배치된 카드는 <strong>다음 턴</strong>부터 공격 가능</li>
+          <li><strong>초록 테두리</strong> = 공격 가능</li>
+          <li>적 유닛이 없으면 직접 공격 가능</li>
+          <li>연속 공격 시 <strong>콤보 보너스</strong> 발동!</li>
+        </ul>
+      </div>
+
+      <div class="help-section">
+        <h4>🔗 시너지</h4>
+        <ul>
+          <li><strong>Lambda + DynamoDB</strong> → 공격력 +15</li>
+          <li><strong>Docker + K8s</strong> → 공격력 +10</li>
+          <li><strong>EC2 + EBS</strong> → HP +30</li>
+          <li><strong>Route 53</strong> → 모든 아군 공격력 +5</li>
+        </ul>
+      </div>
+
+      <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="closeHelp()">닫기</button>
     </div>
   </div>
 
@@ -1101,6 +1332,146 @@
       ]
     };
 
+    // ========== 튜토리얼 시스템 ==========
+    const tutorialSteps = [
+      {
+        title: '🎮 서버 디펜스에 오신 것을 환영합니다!',
+        text: '인프라 카드를 배치하고 적의 공격으로부터 서버를 지키세요!<br><br>상대 서버 HP를 0으로 만들면 승리!',
+        highlight: null
+      },
+      {
+        title: '🃏 카드 확인하기',
+        text: '핸드의 카드를 <strong>탭</strong>하면 상세 정보를 볼 수 있어요.<br><br>각 카드의 효과를 확인해보세요!',
+        highlight: 'hand',
+        arrow: { target: 'hand', direction: 'up' }
+      },
+      {
+        title: '⚡ 카드 배치하기',
+        text: '카드를 <strong>드래그</strong>해서 필드에 놓으면 배치됩니다.<br><br>왼쪽 상단의 숫자가 필요한 마나예요.',
+        highlight: 'hand',
+        arrow: { target: 'field', direction: 'down' }
+      },
+      {
+        title: '⏭️ 턴 종료',
+        text: '할 일을 다 했으면 <strong>턴 종료</strong> 버튼을 눌러주세요.<br><br>배치한 카드는 다음 턴부터 공격할 수 있어요!',
+        highlight: 'endTurn'
+      },
+      {
+        title: '⚔️ 공격하기',
+        text: '초록색 테두리 카드를 <strong>드래그</strong>해서 적에게 공격!<br><br>적 유닛이 없으면 서버를 직접 공격할 수 있어요.',
+        highlight: 'field'
+      }
+    ];
+
+    let tutorialState = {
+      active: false,
+      step: 0,
+      completed: false
+    };
+
+    // 튜토리얼 완료 여부 확인
+    function checkTutorialCompleted() {
+      try {
+        return localStorage.getItem('serverDefenseTutorial') === 'completed';
+      } catch(e) {
+        return false;
+      }
+    }
+
+    function setTutorialCompleted() {
+      try {
+        localStorage.setItem('serverDefenseTutorial', 'completed');
+      } catch(e) {}
+    }
+
+    function startTutorial() {
+      tutorialState.active = true;
+      tutorialState.step = 0;
+      showTutorialStep();
+    }
+
+    function showTutorialStep() {
+      const step = tutorialSteps[tutorialState.step];
+      if (!step) {
+        endTutorial();
+        return;
+      }
+
+      document.getElementById('tutorialStep').textContent = `${tutorialState.step + 1}/${tutorialSteps.length}`;
+      document.getElementById('tutorialTitle').textContent = step.title;
+      document.getElementById('tutorialText').innerHTML = step.text;
+      document.getElementById('tutorialOverlay').classList.add('active');
+
+      // 마지막 단계면 버튼 텍스트 변경
+      const nextBtn = document.getElementById('tutorialNext');
+      nextBtn.textContent = tutorialState.step === tutorialSteps.length - 1 ? '시작하기!' : '다음';
+
+      // 하이라이트 적용
+      clearTutorialHighlights();
+      if (step.highlight) {
+        applyTutorialHighlight(step.highlight);
+      }
+    }
+
+    function nextTutorialStep() {
+      tutorialState.step++;
+      if (tutorialState.step >= tutorialSteps.length) {
+        endTutorial();
+      } else {
+        showTutorialStep();
+      }
+    }
+
+    function skipTutorial() {
+      setTutorialCompleted();
+      endTutorial();
+    }
+
+    function endTutorial() {
+      tutorialState.active = false;
+      setTutorialCompleted();
+      document.getElementById('tutorialOverlay').classList.remove('active');
+      clearTutorialHighlights();
+    }
+
+    function applyTutorialHighlight(target) {
+      switch(target) {
+        case 'hand':
+          document.getElementById('playerHand')?.classList.add('tutorial-highlight');
+          break;
+        case 'field':
+          document.getElementById('playerField')?.classList.add('tutorial-highlight');
+          break;
+        case 'endTurn':
+          document.getElementById('endTurnBtn')?.classList.add('tutorial-highlight');
+          break;
+      }
+    }
+
+    function clearTutorialHighlights() {
+      document.querySelectorAll('.tutorial-highlight').forEach(el => {
+        el.classList.remove('tutorial-highlight');
+      });
+    }
+
+    // ========== 도움말 시스템 ==========
+    function toggleHelp() {
+      const modal = document.getElementById('helpModal');
+      modal.classList.toggle('active');
+    }
+
+    function closeHelp(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('helpModal').classList.remove('active');
+    }
+
+    function resetTutorial() {
+      try {
+        localStorage.removeItem('serverDefenseTutorial');
+        alert('튜토리얼이 초기화되었습니다. 게임을 시작하면 튜토리얼이 다시 나타납니다!');
+      } catch(e) {}
+    }
+
     // ========== 도감 기능 ==========
     function renderCardGrid(filter = 'all') {
       const grid = document.getElementById('cardGrid');
@@ -1199,6 +1570,11 @@
       document.getElementById('battleLog').style.display = 'block';
       updateBattleUI();
       addLog(`🎮 ${difficulty.toUpperCase()} 모드 시작!`, 'info');
+
+      // 첫 플레이 시 튜토리얼 시작
+      if (!checkTutorialCompleted()) {
+        setTimeout(() => startTutorial(), 500);
+      }
     }
 
     function exitGame() {
