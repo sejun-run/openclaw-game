@@ -1018,9 +1018,18 @@
         <button class="filter-btn" data-filter="security">🔒 보안</button>
         <button class="filter-btn" data-filter="devops">⚙️ DevOps</button>
         <button class="filter-btn" data-filter="monitoring">📊 모니터링</button>
-        <button class="filter-btn" data-filter="datastructure">📊 자료구조</button>
-        <button class="filter-btn" data-filter="os">⚙️ 운영체제</button>
-        <button class="filter-btn" data-filter="algorithm">🧮 알고리즘</button>
+        <button class="filter-btn" data-filter="linear">📏 선형</button>
+        <button class="filter-btn" data-filter="tree">🌳 트리</button>
+        <button class="filter-btn" data-filter="hash">🔢 해시</button>
+        <button class="filter-btn" data-filter="graph">🕸️ 그래프</button>
+        <button class="filter-btn" data-filter="process">⚙️ 프로세스</button>
+        <button class="filter-btn" data-filter="memory">🧠 메모리</button>
+        <button class="filter-btn" data-filter="sync">🔒 동기화</button>
+        <button class="filter-btn" data-filter="system">💻 시스템</button>
+        <button class="filter-btn" data-filter="sort">🔀 정렬</button>
+        <button class="filter-btn" data-filter="search">🔍 탐색</button>
+        <button class="filter-btn" data-filter="dp">📊 DP</button>
+        <button class="filter-btn" data-filter="technique">🛠️ 기법</button>
         <button class="filter-btn" data-filter="attack">💥 공격</button>
       </div>
       <div class="card-grid" id="cardGrid"></div>
@@ -1347,135 +1356,135 @@
         desc: 'Man in the Middle. 중간자 공격. 통신 도청 및 변조.',
         effect: 'SSL이 없으면 40 데미지. SSL 있으면 무효.', services: ['공격 카드'] },
       // === CS 자료구조 덱 ===
-      { id: 'array', name: 'Array', icon: '📦', category: 'datastructure', cost: 1, hp: 40, attack: 15, deck: 'datastructure',
+      { id: 'array', name: 'Array', icon: '📦', category: 'linear', cost: 1, hp: 40, attack: 15, deck: 'datastructure',
         desc: '연속된 메모리 공간. O(1) 접근의 기본. 인덱스만 알면 바로 찾는다.',
         effect: '낮은 코스트로 빠른 배치.', services: ['기본 자료구조'] },
-      { id: 'linkedlist', name: 'LinkedList', icon: '🔗', category: 'datastructure', cost: 2, hp: 50, attack: 20, deck: 'datastructure',
+      { id: 'linkedlist', name: 'LinkedList', icon: '🔗', category: 'linear', cost: 2, hp: 50, attack: 20, deck: 'datastructure',
         desc: '노드와 포인터의 연결. 삽입/삭제 O(1). 메모리 유연하게 사용.',
         effect: '파괴 시 다음 노드(카드)에게 공격력 +10 부여.', services: ['기본 자료구조'] },
-      { id: 'hashtable', name: 'HashTable', icon: '#️⃣', category: 'datastructure', cost: 3, hp: 60, attack: 30, deck: 'datastructure',
+      { id: 'hashtable', name: 'HashTable', icon: '#️⃣', category: 'hash', cost: 3, hp: 60, attack: 30, deck: 'datastructure',
         desc: 'Key-Value의 왕. 평균 O(1) 검색. 해시 충돌만 조심하면 최강.',
         effect: '필드에 있으면 카드 검색(드로우) 시 원하는 카드 선택 가능.', services: ['Dictionary', 'Map'] },
-      { id: 'binarytree', name: 'BinaryTree', icon: '🌳', category: 'datastructure', cost: 3, hp: 70, attack: 25, deck: 'datastructure',
+      { id: 'binarytree', name: 'BinaryTree', icon: '🌳', category: 'tree', cost: 3, hp: 70, attack: 25, deck: 'datastructure',
         desc: '최대 2개의 자식 노드. 탐색, 정렬, 우선순위 큐의 기반.',
         effect: '배치 시 좌우 카드에 HP +15 부여.', services: ['BST', 'Heap'] },
-      { id: 'stack', name: 'Stack', icon: '📚', category: 'datastructure', cost: 1, hp: 30, attack: 20, deck: 'datastructure',
+      { id: 'stack', name: 'Stack', icon: '📚', category: 'linear', cost: 1, hp: 30, attack: 20, deck: 'datastructure',
         desc: 'LIFO - 마지막에 넣은 게 먼저 나온다. 함수 호출의 비밀.',
         effect: '파괴 시 마지막에 사용한 카드 1장 핸드로 복귀.', services: ['Call Stack'] },
-      { id: 'queue', name: 'Queue', icon: '🚶', category: 'datastructure', cost: 1, hp: 35, attack: 15, deck: 'datastructure',
+      { id: 'queue', name: 'Queue', icon: '🚶', category: 'linear', cost: 1, hp: 35, attack: 15, deck: 'datastructure',
         desc: 'FIFO - 먼저 넣은 게 먼저 나온다. 줄 서기의 정석.',
         effect: '매턴 시작 시 카드 1장 자동 드로우.', services: ['BFS', 'Task Queue'] },
-      { id: 'graph', name: 'Graph', icon: '🕸️', category: 'datastructure', cost: 4, hp: 80, attack: 35, deck: 'datastructure',
+      { id: 'graph', name: 'Graph', icon: '🕸️', category: 'graph', cost: 4, hp: 80, attack: 35, deck: 'datastructure',
         desc: '정점과 간선의 네트워크. SNS, 지도, 추천 시스템의 핵심.',
         effect: '모든 아군 카드와 연결 - 하나가 공격받으면 데미지 분산.', services: ['Neo4j', 'Network'] },
       // === CS 운영체제 덱 ===
-      { id: 'process', name: 'Process', icon: '⚙️', category: 'os', cost: 2, hp: 50, attack: 20, deck: 'os',
+      { id: 'process', name: 'Process', icon: '⚙️', category: 'process', cost: 2, hp: 50, attack: 20, deck: 'os',
         desc: '실행 중인 프로그램. 독립된 메모리 공간. 무겁지만 안전.',
         effect: '독립적 - 다른 카드 파괴에 영향 안 받음.', services: ['PID', 'PCB'] },
-      { id: 'thread', name: 'Thread', icon: '🧵', category: 'os', cost: 1, hp: 25, attack: 25, deck: 'os',
+      { id: 'thread', name: 'Thread', icon: '🧵', category: 'process', cost: 1, hp: 25, attack: 25, deck: 'os',
         desc: '프로세스 내 실행 단위. 메모리 공유로 가볍고 빠름.',
         effect: 'Process와 함께 있으면 공격력 2배.', services: ['Multithreading'] },
-      { id: 'mutex', name: 'Mutex', icon: '🔒', category: 'os', cost: 2, hp: 40, attack: 0, deck: 'os',
+      { id: 'mutex', name: 'Mutex', icon: '🔒', category: 'sync', cost: 2, hp: 40, attack: 0, deck: 'os',
         desc: '상호 배제. 한 번에 하나만 접근. 동시성의 수호자.',
         effect: '적의 동시 공격(2회 이상) 막음.', services: ['Lock', 'Semaphore'] },
-      { id: 'scheduler', name: 'Scheduler', icon: '📅', category: 'os', cost: 3, hp: 45, attack: 15, deck: 'os',
+      { id: 'scheduler', name: 'Scheduler', icon: '📅', category: 'process', cost: 3, hp: 45, attack: 15, deck: 'os',
         desc: 'CPU 시간 분배의 심판. FCFS, SJF, Round Robin.',
         effect: '아군 카드 공격 순서 최적화 - 데미지 +20%.', services: ['CPU Scheduler'] },
-      { id: 'memory', name: 'Memory', icon: '🧠', category: 'os', cost: 3, hp: 100, attack: 10, deck: 'os',
+      { id: 'memory', name: 'Memory', icon: '🧠', category: 'memory', cost: 3, hp: 100, attack: 10, deck: 'os',
         desc: 'RAM - 휘발성 저장소. 빠른 접근, 한정된 용량.',
         effect: '핸드 최대 장수 +2.', services: ['RAM', 'Virtual Memory'] },
-      { id: 'filesystem', name: 'FileSystem', icon: '📁', category: 'os', cost: 2, hp: 60, attack: 5, deck: 'os',
+      { id: 'filesystem', name: 'FileSystem', icon: '📁', category: 'system', cost: 2, hp: 60, attack: 5, deck: 'os',
         desc: '파일 저장과 관리. inode, 디렉토리, 권한의 세계.',
         effect: '파괴된 카드 1장을 덱으로 복구.', services: ['ext4', 'NTFS'] },
       // === CS 알고리즘 덱 ===
-      { id: 'quicksort', name: 'QuickSort', icon: '⚡', category: 'algorithm', cost: 3, hp: 50, attack: 40, deck: 'algorithm',
+      { id: 'quicksort', name: 'QuickSort', icon: '⚡', category: 'sort', cost: 3, hp: 50, attack: 40, deck: 'algorithm',
         desc: '분할 정복의 대표. 평균 O(n log n). 피벗 선택이 핵심.',
         effect: '적 카드 중 HP 가장 낮은 것 우선 공격.', services: ['정렬 알고리즘'] },
-      { id: 'bfs', name: 'BFS', icon: '🌊', category: 'algorithm', cost: 2, hp: 40, attack: 25, deck: 'algorithm',
+      { id: 'bfs', name: 'BFS', icon: '🌊', category: 'search', cost: 2, hp: 40, attack: 25, deck: 'algorithm',
         desc: '너비 우선 탐색. 레벨 단위로 탐색. 최단 경로의 기본.',
         effect: '모든 적 카드에 10 데미지 (광역).', services: ['그래프 탐색'] },
-      { id: 'dfs', name: 'DFS', icon: '🏊', category: 'algorithm', cost: 2, hp: 35, attack: 35, deck: 'algorithm',
+      { id: 'dfs', name: 'DFS', icon: '🏊', category: 'search', cost: 2, hp: 35, attack: 35, deck: 'algorithm',
         desc: '깊이 우선 탐색. 끝까지 파고든다. 백트래킹의 친구.',
         effect: '적 1명에게 집중 공격 (데미지 1.5배).', services: ['그래프 탐색'] },
-      { id: 'dp', name: 'Dynamic Programming', icon: '📊', category: 'algorithm', cost: 4, hp: 60, attack: 30, deck: 'algorithm',
+      { id: 'dp', name: 'Dynamic Programming', icon: '📊', category: 'dp', cost: 4, hp: 60, attack: 30, deck: 'algorithm',
         desc: '메모이제이션의 힘. 중복 계산 제거. 최적 부분 구조.',
         effect: '이전에 사용한 카드 효과 재사용 가능.', services: ['최적화'] },
-      { id: 'greedy', name: 'Greedy', icon: '🤑', category: 'algorithm', cost: 1, hp: 20, attack: 30, deck: 'algorithm',
+      { id: 'greedy', name: 'Greedy', icon: '🤑', category: 'technique', cost: 1, hp: 20, attack: 30, deck: 'algorithm',
         desc: '매 순간 최선의 선택. 빠르지만 항상 최적은 아님.',
         effect: '즉시 공격 가능. 단, 다음 턴 공격 불가.', services: ['탐욕 알고리즘'] },
-      { id: 'dijkstra', name: 'Dijkstra', icon: '🗺️', category: 'algorithm', cost: 3, hp: 55, attack: 25, deck: 'algorithm',
+      { id: 'dijkstra', name: 'Dijkstra', icon: '🗺️', category: 'search', cost: 3, hp: 55, attack: 25, deck: 'algorithm',
         desc: '최단 경로의 전설. 음수 가중치만 아니면 OK.',
         effect: '가장 약한 적을 찾아 자동 공격.', services: ['최단 경로'] },
       // === 자료구조 추가 카드 ===
-      { id: 'heap', name: 'Heap', icon: '⛰️', category: 'datastructure', cost: 3, hp: 80, attack: 20, deck: 'datastructure',
+      { id: 'heap', name: 'Heap', icon: '⛰️', category: 'tree', cost: 3, hp: 80, attack: 20, deck: 'datastructure',
         desc: '완전 이진 트리 기반 우선순위 큐. 최대/최소값 O(1) 접근.',
         effect: '매턴 가장 강한 적 카드를 우선 공격.', services: ['Priority Queue'] },
-      { id: 'trie', name: 'Trie', icon: '🔤', category: 'datastructure', cost: 2, hp: 45, attack: 15, deck: 'datastructure',
+      { id: 'trie', name: 'Trie', icon: '🔤', category: 'tree', cost: 2, hp: 45, attack: 15, deck: 'datastructure',
         desc: '문자열 검색의 달인. 자동완성, 사전 구현의 핵심.',
         effect: '필드에 있으면 원하는 카드 검색 가능.', services: ['Prefix Tree'] },
-      { id: 'set', name: 'Set', icon: '🎯', category: 'datastructure', cost: 1, hp: 35, attack: 18, deck: 'datastructure',
+      { id: 'set', name: 'Set', icon: '🎯', category: 'hash', cost: 1, hp: 35, attack: 18, deck: 'datastructure',
         desc: '중복 없는 집합. 존재 여부 O(1) 확인.',
         effect: '같은 카드 중복 배치 시 공격력 +15.', services: ['HashSet'] },
-      { id: 'deque', name: 'Deque', icon: '↔️', category: 'datastructure', cost: 2, hp: 40, attack: 22, deck: 'datastructure',
+      { id: 'deque', name: 'Deque', icon: '↔️', category: 'linear', cost: 2, hp: 40, attack: 22, deck: 'datastructure',
         desc: '양방향 큐. 앞뒤 모두 O(1) 삽입/삭제.',
         effect: '배치 위치 자유롭게 선택 가능.', services: ['Double-ended Queue'] },
-      { id: 'rbtree', name: 'Red-Black Tree', icon: '🔴⚫', category: 'datastructure', cost: 4, hp: 90, attack: 28, deck: 'datastructure',
+      { id: 'rbtree', name: 'Red-Black Tree', icon: '🔴⚫', category: 'tree', cost: 4, hp: 90, attack: 28, deck: 'datastructure',
         desc: '자가 균형 이진 탐색 트리. 삽입/삭제 후에도 O(log n) 보장.',
         effect: '받는 데미지 20% 감소 (균형 유지).', services: ['TreeMap', 'TreeSet'] },
-      { id: 'pqueue', name: 'PriorityQueue', icon: '🏆', category: 'datastructure', cost: 2, hp: 35, attack: 30, deck: 'datastructure',
+      { id: 'pqueue', name: 'PriorityQueue', icon: '🏆', category: 'tree', cost: 2, hp: 35, attack: 30, deck: 'datastructure',
         desc: '우선순위대로 처리. 작업 스케줄링의 핵심.',
         effect: '공격 시 가장 위험한 적 우선 타겟.', services: ['Heap 기반'] },
-      { id: 'bloom', name: 'BloomFilter', icon: '🌸', category: 'datastructure', cost: 1, hp: 25, attack: 10, deck: 'datastructure',
+      { id: 'bloom', name: 'BloomFilter', icon: '🌸', category: 'hash', cost: 1, hp: 25, attack: 10, deck: 'datastructure',
         desc: '확률적 자료구조. 있을 수도 있고 없을 수도 있고... 거짓 양성 주의!',
         effect: '30% 확률로 적 공격 회피.', services: ['캐시', '스팸 필터'] },
       // === 운영체제 추가 카드 ===
-      { id: 'kernel', name: 'Kernel', icon: '🎛️', category: 'os', cost: 5, hp: 120, attack: 25, deck: 'os',
+      { id: 'kernel', name: 'Kernel', icon: '🎛️', category: 'system', cost: 5, hp: 120, attack: 25, deck: 'os',
         desc: 'OS의 핵심. 하드웨어와 소프트웨어 사이의 중재자.',
         effect: '모든 OS 카드 공격력 +10.', services: ['Linux', 'Windows NT'] },
-      { id: 'interrupt', name: 'Interrupt', icon: '⚡', category: 'os', cost: 1, hp: 20, attack: 35, deck: 'os',
+      { id: 'interrupt', name: 'Interrupt', icon: '⚡', category: 'process', cost: 1, hp: 20, attack: 35, deck: 'os',
         desc: 'CPU야 잠깐! 급한 일이 생겼어. 하던 일 멈추고 이것부터.',
         effect: '적 턴에 즉시 반격 가능.', services: ['IRQ', 'ISR'] },
-      { id: 'pagetable', name: 'PageTable', icon: '📑', category: 'os', cost: 2, hp: 50, attack: 10, deck: 'os',
+      { id: 'pagetable', name: 'PageTable', icon: '📑', category: 'memory', cost: 2, hp: 50, attack: 10, deck: 'os',
         desc: '가상 주소 → 물리 주소 변환의 비밀. 메모리 보호의 핵심.',
         effect: '아군 카드가 받는 데미지 -10.', services: ['MMU', 'TLB'] },
-      { id: 'cache', name: 'Cache', icon: '💨', category: 'os', cost: 2, hp: 30, attack: 25, deck: 'os',
+      { id: 'cache', name: 'Cache', icon: '💨', category: 'memory', cost: 2, hp: 30, attack: 25, deck: 'os',
         desc: '자주 쓰는 건 가까이! L1, L2, L3의 계층 구조.',
         effect: '같은 카드 연속 사용 시 코스트 -1.', services: ['CPU Cache'] },
-      { id: 'deadlock', name: 'Deadlock', icon: '💀', category: 'os', cost: 3, hp: 40, attack: 0, deck: 'os',
+      { id: 'deadlock', name: 'Deadlock', icon: '💀', category: 'sync', cost: 3, hp: 40, attack: 0, deck: 'os',
         desc: '서로 기다리다 영원히 멈춤. 상호배제, 점유대기, 비선점, 순환대기.',
         effect: '적 카드 1장을 2턴간 행동불능.', services: ['교착상태'] },
-      { id: 'semaphore', name: 'Semaphore', icon: '🚦', category: 'os', cost: 2, hp: 45, attack: 12, deck: 'os',
+      { id: 'semaphore', name: 'Semaphore', icon: '🚦', category: 'sync', cost: 2, hp: 45, attack: 12, deck: 'os',
         desc: '신호등처럼 자원 접근 제어. Mutex의 일반화 버전.',
         effect: '아군 카드 동시 공격 시 데미지 +20%.', services: ['동기화'] },
-      { id: 'shell', name: 'Shell', icon: '💻', category: 'os', cost: 1, hp: 30, attack: 15, deck: 'os',
+      { id: 'shell', name: 'Shell', icon: '💻', category: 'system', cost: 1, hp: 30, attack: 15, deck: 'os',
         desc: '사용자와 커널 사이의 인터페이스. bash, zsh, PowerShell.',
         effect: '배치 시 카드 1장 드로우.', services: ['CLI', 'Terminal'] },
-      { id: 'vmemory', name: 'Virtual Memory', icon: '🌀', category: 'os', cost: 4, hp: 100, attack: 15, deck: 'os',
+      { id: 'vmemory', name: 'Virtual Memory', icon: '🌀', category: 'memory', cost: 4, hp: 100, attack: 15, deck: 'os',
         desc: '실제보다 큰 메모리처럼! 스왑과 페이징의 마법.',
         effect: '핸드 최대 +3, 덱 소진 시 버린 카드 재활용.', services: ['Swap', 'Paging'] },
       // === 알고리즘 추가 카드 ===
-      { id: 'bsearch', name: 'Binary Search', icon: '🔍', category: 'algorithm', cost: 1, hp: 25, attack: 28, deck: 'algorithm',
+      { id: 'bsearch', name: 'Binary Search', icon: '🔍', category: 'search', cost: 1, hp: 25, attack: 28, deck: 'algorithm',
         desc: '반씩 나눠서 찾기. 정렬된 데이터에서 O(log n).',
         effect: '적 카드 중 특정 HP 이하만 공격 가능 (정밀 타격).', services: ['이분 탐색'] },
-      { id: 'msort', name: 'MergeSort', icon: '🔀', category: 'algorithm', cost: 3, hp: 65, attack: 30, deck: 'algorithm',
+      { id: 'msort', name: 'MergeSort', icon: '🔀', category: 'sort', cost: 3, hp: 65, attack: 30, deck: 'algorithm',
         desc: '분할 정복 정렬. 안정 정렬, 최악에도 O(n log n).',
         effect: '2장 이상 배치 시 공격력 합산.', services: ['분할 정복'] },
-      { id: 'astar', name: 'A* Algorithm', icon: '⭐', category: 'algorithm', cost: 4, hp: 50, attack: 35, deck: 'algorithm',
+      { id: 'astar', name: 'A* Algorithm', icon: '⭐', category: 'search', cost: 4, hp: 50, attack: 35, deck: 'algorithm',
         desc: '휴리스틱 + 다익스트라. 게임 AI 길찾기의 정석.',
         effect: '적 서버 직접 공격 시 데미지 1.5배.', services: ['경로 탐색'] },
-      { id: 'backtrack', name: 'Backtracking', icon: '↩️', category: 'algorithm', cost: 2, hp: 40, attack: 20, deck: 'algorithm',
+      { id: 'backtrack', name: 'Backtracking', icon: '↩️', category: 'dp', cost: 2, hp: 40, attack: 20, deck: 'algorithm',
         desc: '막다른 길이면 되돌아가! N-Queen, 스도쿠의 해법.',
         effect: '파괴 시 핸드로 복귀 (1회).', services: ['완전 탐색'] },
-      { id: 'recursion', name: 'Recursion', icon: '🔁', category: 'algorithm', cost: 2, hp: 35, attack: 25, deck: 'algorithm',
+      { id: 'recursion', name: 'Recursion', icon: '🔁', category: 'dp', cost: 2, hp: 35, attack: 25, deck: 'algorithm',
         desc: '자기 자신을 호출. 기저 조건 없으면 스택 오버플로우!',
         effect: '공격 시 30% 확률로 한 번 더 공격.', services: ['재귀 호출'] },
-      { id: 'twoptr', name: 'Two Pointers', icon: '👆👆', category: 'algorithm', cost: 1, hp: 30, attack: 22, deck: 'algorithm',
+      { id: 'twoptr', name: 'Two Pointers', icon: '👆👆', category: 'technique', cost: 1, hp: 30, attack: 22, deck: 'algorithm',
         desc: '양쪽에서 좁혀오기. 정렬된 배열 탐색의 꿀팁.',
         effect: '양 옆 카드와 함께 공격 시 데미지 +30%.', services: ['투 포인터'] },
-      { id: 'slidingwin', name: 'Sliding Window', icon: '🪟', category: 'algorithm', cost: 2, hp: 45, attack: 18, deck: 'algorithm',
+      { id: 'slidingwin', name: 'Sliding Window', icon: '🪟', category: 'technique', cost: 2, hp: 45, attack: 18, deck: 'algorithm',
         desc: '창문을 밀면서 탐색. 부분 배열/문자열 문제의 핵심.',
         effect: '연속 3턴 필드 유지 시 공격력 2배.', services: ['구간 탐색'] },
-      { id: 'unionfind', name: 'Union-Find', icon: '🤝', category: 'algorithm', cost: 3, hp: 70, attack: 20, deck: 'algorithm',
+      { id: 'unionfind', name: 'Union-Find', icon: '🤝', category: 'technique', cost: 3, hp: 70, attack: 20, deck: 'algorithm',
         desc: '서로소 집합. 누가 같은 편인지 빠르게 확인.',
         effect: '같은 덱 카드끼리 데미지 공유 (분산).', services: ['Disjoint Set'] },
     ];
@@ -1492,19 +1501,19 @@
         name: '📊 자료구조',
         desc: '효율적인 데이터 관리로 승리',
         color: '#ff6b6b',
-        categories: ['datastructure']
+        categories: ['linear', 'tree', 'hash', 'graph']
       },
       os: {
         name: '⚙️ 운영체제',
         desc: '프로세스와 메모리로 시스템 장악',
         color: '#4ecdc4',
-        categories: ['os']
+        categories: ['process', 'memory', 'sync', 'system']
       },
       algorithm: {
         name: '🧮 알고리즘',
         desc: '최적의 전략으로 적을 제압',
         color: '#ffe66d',
-        categories: ['algorithm']
+        categories: ['sort', 'search', 'dp', 'technique']
       }
     };
 
@@ -1729,7 +1738,9 @@
         computing: '🖥️ 컴퓨팅', storage: '💾 스토리지', database: '🗄️ DB',
         network: '🌐 네트워크', security: '🔒 보안', devops: '⚙️ DevOps',
         monitoring: '📊 모니터링', attack: '💥 공격',
-        datastructure: '📊 자료구조', os: '⚙️ 운영체제', algorithm: '🧮 알고리즘'
+        linear: '📏 선형', tree: '🌳 트리', hash: '🔢 해시', graph: '🕸️ 그래프',
+        process: '⚙️ 프로세스', memory: '🧠 메모리', sync: '🔒 동기화', system: '💻 시스템',
+        sort: '🔀 정렬', search: '🔍 탐색', dp: '📊 DP', technique: '🛠️ 기법'
       };
       return names[cat] || cat;
     }
