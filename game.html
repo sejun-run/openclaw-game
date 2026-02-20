@@ -504,21 +504,29 @@
       min-width: 80px;
     }
 
-    /* 턴 종료 버튼 - 연한 색상 */
+    /* 턴 종료 버튼 - 눈에 띄는 색상 */
     #endTurnBtn {
-      background: linear-gradient(135deg, #3d9970, #4db380);
+      background: linear-gradient(135deg, #e67e22, #f39c12);
+      color: #fff;
+      font-weight: bold;
+      border: 2px solid #f39c12;
       transition: all 0.3s;
+    }
+
+    #endTurnBtn:hover {
+      background: linear-gradient(135deg, #d35400, #e67e22);
+      transform: scale(1.05);
     }
 
     /* 할 동작 없을 때만 빛나게 */
     #endTurnBtn.highlight {
       animation: btnPulse 1.5s infinite;
-      box-shadow: 0 0 15px rgba(77, 179, 128, 0.6);
+      box-shadow: 0 0 20px rgba(243, 156, 18, 0.8);
     }
 
     @keyframes btnPulse {
-      0%, 100% { box-shadow: 0 0 8px rgba(77, 179, 128, 0.4); }
-      50% { box-shadow: 0 0 18px rgba(77, 179, 128, 0.8); }
+      0%, 100% { box-shadow: 0 0 10px rgba(243, 156, 18, 0.5); }
+      50% { box-shadow: 0 0 25px rgba(243, 156, 18, 1); }
     }
 
     /* 공격 중인 카드 */
@@ -2421,12 +2429,19 @@
         el.addEventListener('touchstart', (e) => {
           e.preventDefault();
           const card = game.player.field[fieldIndex];
-          if (!card || !card.canAttack || game.turn !== 'player') return;
+          if (!card) return;
           
           startTime = Date.now();
           moved = false;
           const touch = e.touches[0];
-          attackDragState = { active: false, cardIndex: fieldIndex, startX: touch.clientX, startY: touch.clientY };
+          // 공격 가능 여부와 관계없이 탭 감지, 드래그는 공격 가능할 때만
+          attackDragState = { 
+            active: false, 
+            cardIndex: fieldIndex, 
+            startX: touch.clientX, 
+            startY: touch.clientY,
+            canAttack: card.canAttack && game.turn === 'player'
+          };
         });
 
         el.addEventListener('touchmove', (e) => {
@@ -2437,10 +2452,13 @@
           
           if (dx > 10 || dy > 10) {
             moved = true;
-            attackDragState.active = true;
-            el.classList.add('attacking-source');
-            showAttackTargets();
-            updateAttackArrow(touch.clientX, touch.clientY);
+            // 공격 가능할 때만 드래그 공격 UI 표시
+            if (attackDragState.canAttack) {
+              attackDragState.active = true;
+              el.classList.add('attacking-source');
+              showAttackTargets();
+              updateAttackArrow(touch.clientX, touch.clientY);
+            }
           }
         });
 
