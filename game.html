@@ -553,24 +553,12 @@
       color: #aaa;
     }
 
-    /* 할 동작 없을 때 강조 (주황색) */
+    /* 할 동작 없을 때 강조 (초록색) */
     #endTurnBtn.highlight {
-      background: linear-gradient(135deg, #e67e22, #f39c12);
+      background: linear-gradient(135deg, #3d9970, #4db380);
       color: #fff;
       font-weight: bold;
-      border: 2px solid #f39c12;
-      animation: btnPulse 1.5s infinite;
-      box-shadow: 0 0 20px rgba(243, 156, 18, 0.8);
-    }
-
-    #endTurnBtn.highlight:hover {
-      background: linear-gradient(135deg, #d35400, #e67e22);
-      transform: scale(1.05);
-    }
-
-    @keyframes btnPulse {
-      0%, 100% { box-shadow: 0 0 10px rgba(243, 156, 18, 0.5); }
-      50% { box-shadow: 0 0 25px rgba(243, 156, 18, 1); }
+      border: 1px solid #4db380;
     }
 
     /* 공격 중인 카드 */
