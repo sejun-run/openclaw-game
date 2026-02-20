@@ -2498,23 +2498,27 @@
         const fieldIndex = parseInt(el.dataset.fieldIndex);
         let startTime = 0;
         let moved = false;
+        let touchStarted = false;
 
         el.addEventListener('touchstart', (e) => {
           e.preventDefault();
           const card = game.player.field[fieldIndex];
-          if (!card) return;
           
           startTime = Date.now();
           moved = false;
-          const touch = e.touches[0];
-          // 공격 가능 여부와 관계없이 탭 감지, 드래그는 공격 가능할 때만
-          attackDragState = { 
-            active: false, 
-            cardIndex: fieldIndex, 
-            startX: touch.clientX, 
-            startY: touch.clientY,
-            canAttack: card.canAttack && game.turn === 'player'
-          };
+          touchStarted = true;
+          
+          if (card) {
+            const touch = e.touches[0];
+            // 공격 가능 여부와 관계없이 탭 감지, 드래그는 공격 가능할 때만
+            attackDragState = { 
+              active: false, 
+              cardIndex: fieldIndex, 
+              startX: touch.clientX, 
+              startY: touch.clientY,
+              canAttack: card.canAttack && game.turn === 'player'
+            };
+          }
         });
 
         el.addEventListener('touchmove', (e) => {
@@ -2536,13 +2540,14 @@
         });
 
         el.addEventListener('touchend', (e) => {
-          if (attackDragState.cardIndex !== fieldIndex) return;
+          if (!touchStarted) return;
+          touchStarted = false;
           
           if (!moved && Date.now() - startTime < 300) {
-            // 탭 = 설명 표시
+            // 탭 = 설명 표시 (공격 가능 여부 무관)
             const card = game.player.field[fieldIndex];
             if (card) showFieldCardInfo(card);
-          } else if (attackDragState.active) {
+          } else if (attackDragState.active && attackDragState.cardIndex === fieldIndex) {
             // 드래그 = 공격
             const touch = e.changedTouches[0];
             executeAttackOnTarget(fieldIndex, touch.clientX, touch.clientY);
