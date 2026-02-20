@@ -1018,6 +1018,9 @@
         <button class="filter-btn" data-filter="security">🔒 보안</button>
         <button class="filter-btn" data-filter="devops">⚙️ DevOps</button>
         <button class="filter-btn" data-filter="monitoring">📊 모니터링</button>
+        <button class="filter-btn" data-filter="datastructure">📊 자료구조</button>
+        <button class="filter-btn" data-filter="os">⚙️ 운영체제</button>
+        <button class="filter-btn" data-filter="algorithm">🧮 알고리즘</button>
         <button class="filter-btn" data-filter="attack">💥 공격</button>
       </div>
       <div class="card-grid" id="cardGrid"></div>
@@ -1725,7 +1728,8 @@
       const names = {
         computing: '🖥️ 컴퓨팅', storage: '💾 스토리지', database: '🗄️ DB',
         network: '🌐 네트워크', security: '🔒 보안', devops: '⚙️ DevOps',
-        monitoring: '📊 모니터링', attack: '💥 공격'
+        monitoring: '📊 모니터링', attack: '💥 공격',
+        datastructure: '📊 자료구조', os: '⚙️ 운영체제', algorithm: '🧮 알고리즘'
       };
       return names[cat] || cat;
     }
