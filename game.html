@@ -125,6 +125,41 @@
       margin-bottom: 20px;
     }
 
+    /* 덱 필터 (상단) */
+    .deck-filters {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .deck-filter-btn {
+      padding: 10px 18px;
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 25px;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 0.95em;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .deck-filter-btn:hover {
+      background: rgba(0, 255, 136, 0.15);
+      border-color: #00ff88;
+      color: #fff;
+    }
+
+    .deck-filter-btn.active {
+      background: linear-gradient(135deg, #00ff88, #00d9ff);
+      border-color: transparent;
+      color: #000;
+      font-weight: bold;
+    }
+
+    /* 카테고리 필터 (하단) */
     .filter-btn {
       padding: 8px 16px;
       background: rgba(255,255,255,0.05);
@@ -1017,28 +1052,17 @@
 
     <!-- 도감 탭 -->
     <div id="collection" class="tab-content active">
-      <div class="filters">
+      <!-- 덱 선택 -->
+      <div class="deck-filters">
+        <button class="deck-filter-btn active" data-deck="all">📚 전체</button>
+        <button class="deck-filter-btn" data-deck="infra">🖥️ 인프라</button>
+        <button class="deck-filter-btn" data-deck="datastructure">📊 자료구조</button>
+        <button class="deck-filter-btn" data-deck="os">⚙️ 운영체제</button>
+        <button class="deck-filter-btn" data-deck="algorithm">🧮 알고리즘</button>
+      </div>
+      <!-- 카테고리 필터 (덱에 따라 동적 변경) -->
+      <div class="filters" id="categoryFilters">
         <button class="filter-btn active" data-filter="all">전체</button>
-        <button class="filter-btn" data-filter="computing">🖥️ 컴퓨팅</button>
-        <button class="filter-btn" data-filter="storage">💾 스토리지</button>
-        <button class="filter-btn" data-filter="database">🗄️ DB</button>
-        <button class="filter-btn" data-filter="network">🌐 네트워크</button>
-        <button class="filter-btn" data-filter="security">🔒 보안</button>
-        <button class="filter-btn" data-filter="devops">⚙️ DevOps</button>
-        <button class="filter-btn" data-filter="monitoring">📊 모니터링</button>
-        <button class="filter-btn" data-filter="linear">📏 선형</button>
-        <button class="filter-btn" data-filter="tree">🌳 트리</button>
-        <button class="filter-btn" data-filter="hash">🔢 해시</button>
-        <button class="filter-btn" data-filter="graph">🕸️ 그래프</button>
-        <button class="filter-btn" data-filter="process">⚙️ 프로세스</button>
-        <button class="filter-btn" data-filter="memory">🧠 메모리</button>
-        <button class="filter-btn" data-filter="sync">🔒 동기화</button>
-        <button class="filter-btn" data-filter="system">💻 시스템</button>
-        <button class="filter-btn" data-filter="sort">🔀 정렬</button>
-        <button class="filter-btn" data-filter="search">🔍 탐색</button>
-        <button class="filter-btn" data-filter="dp">📊 DP</button>
-        <button class="filter-btn" data-filter="technique">🛠️ 기법</button>
-        <button class="filter-btn" data-filter="attack">💥 공격</button>
       </div>
       <div class="card-grid" id="cardGrid"></div>
     </div>
@@ -1723,9 +1747,58 @@
     }
 
     // ========== 도감 기능 ==========
-    function renderCardGrid(filter = 'all') {
+    // 도감 필터 상태
+    let currentDeckFilter = 'all';
+    let currentCategoryFilter = 'all';
+
+    // 덱별 카테고리 정의
+    const deckCategories = {
+      all: ['computing', 'storage', 'database', 'network', 'security', 'devops', 'monitoring', 
+            'linear', 'tree', 'hash', 'graph', 'process', 'memory', 'sync', 'system',
+            'sort', 'search', 'dp', 'technique', 'attack'],
+      infra: ['computing', 'storage', 'database', 'network', 'security', 'devops', 'monitoring', 'attack'],
+      datastructure: ['linear', 'tree', 'hash', 'graph'],
+      os: ['process', 'memory', 'sync', 'system'],
+      algorithm: ['sort', 'search', 'dp', 'technique']
+    };
+
+    function updateCategoryFilters(deck) {
+      const container = document.getElementById('categoryFilters');
+      const categories = deckCategories[deck] || deckCategories.all;
+      
+      let html = '<button class="filter-btn active" data-filter="all">전체</button>';
+      categories.forEach(cat => {
+        html += `<button class="filter-btn" data-filter="${cat}">${getCategoryName(cat)}</button>`;
+      });
+      container.innerHTML = html;
+      
+      // 이벤트 바인딩
+      container.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentCategoryFilter = btn.dataset.filter;
+          renderCardGrid();
+        });
+      });
+    }
+
+    function renderCardGrid() {
       const grid = document.getElementById('cardGrid');
-      const cards = filter === 'all' ? allCards : allCards.filter(c => c.category === filter);
+      
+      // 덱 필터
+      let cards = allCards;
+      if (currentDeckFilter !== 'all') {
+        const deckDef = deckDefinitions[currentDeckFilter];
+        cards = cards.filter(c => 
+          deckDef.categories.includes(c.category) || c.deck === currentDeckFilter
+        );
+      }
+      
+      // 카테고리 필터
+      if (currentCategoryFilter !== 'all') {
+        cards = cards.filter(c => c.category === currentCategoryFilter);
+      }
       
       grid.innerHTML = cards.map(card => `
         <div class="card-item" onclick="showCardDetail('${card.id}')">
@@ -2825,14 +2898,20 @@
       });
     });
 
-    document.querySelectorAll('.filter-btn').forEach(btn => {
+    // 덱 필터 버튼 이벤트
+    document.querySelectorAll('.deck-filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.deck-filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        renderCardGrid(btn.dataset.filter);
+        currentDeckFilter = btn.dataset.deck;
+        currentCategoryFilter = 'all';
+        updateCategoryFilters(currentDeckFilter);
+        renderCardGrid();
       });
     });
 
+    // 초기 렌더링
+    updateCategoryFilters('all');
     renderCardGrid();
   </script>
 </body>
