@@ -125,38 +125,42 @@
       margin-bottom: 20px;
     }
 
-    /* 덱 필터 (상단) */
-    .deck-filters {
+    /* 덱 선택 드롭다운 */
+    .deck-select-wrapper {
       display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
       margin-bottom: 15px;
-      flex-wrap: wrap;
     }
 
-    .deck-filter-btn {
-      padding: 10px 18px;
-      background: rgba(255,255,255,0.08);
-      border: 2px solid rgba(255,255,255,0.15);
-      border-radius: 25px;
-      color: #ccc;
-      cursor: pointer;
+    .deck-select-wrapper label {
+      color: #aaa;
       font-size: 0.95em;
-      font-weight: 500;
-      transition: all 0.3s;
     }
 
-    .deck-filter-btn:hover {
-      background: rgba(0, 255, 136, 0.15);
-      border-color: #00ff88;
+    .deck-dropdown {
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 25px;
       color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.3s;
+      min-width: 160px;
     }
 
-    .deck-filter-btn.active {
-      background: linear-gradient(135deg, #00ff88, #00d9ff);
-      border-color: transparent;
-      color: #000;
-      font-weight: bold;
+    .deck-dropdown:hover, .deck-dropdown:focus {
+      border-color: #00d9ff;
+      background: rgba(0, 217, 255, 0.15);
+    }
+
+    .deck-dropdown option {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 10px;
     }
 
     /* 카테고리 필터 (하단) */
@@ -1049,13 +1053,16 @@
 
     <!-- 도감 탭 -->
     <div id="collection" class="tab-content active">
-      <!-- 덱 선택 -->
-      <div class="deck-filters">
-        <button class="deck-filter-btn active" data-deck="all">📚 전체</button>
-        <button class="deck-filter-btn" data-deck="infra">🖥️ 인프라</button>
-        <button class="deck-filter-btn" data-deck="datastructure">📊 자료구조</button>
-        <button class="deck-filter-btn" data-deck="os">⚙️ 운영체제</button>
-        <button class="deck-filter-btn" data-deck="algorithm">🧮 알고리즘</button>
+      <!-- 덱 선택 (드롭다운) -->
+      <div class="deck-select-wrapper">
+        <label for="deckSelect">덱:</label>
+        <select id="deckSelect" class="deck-dropdown">
+          <option value="all">📚 전체</option>
+          <option value="infra">🖥️ 인프라</option>
+          <option value="datastructure">📊 자료구조</option>
+          <option value="os">⚙️ 운영체제</option>
+          <option value="algorithm">🧮 알고리즘</option>
+        </select>
       </div>
       <!-- 카테고리 필터 (덱에 따라 동적 변경) -->
       <div class="filters" id="categoryFilters">
@@ -2900,16 +2907,12 @@
       });
     });
 
-    // 덱 필터 버튼 이벤트
-    document.querySelectorAll('.deck-filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.deck-filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentDeckFilter = btn.dataset.deck;
-        currentCategoryFilter = 'all';
-        updateCategoryFilters(currentDeckFilter);
-        renderCardGrid();
-      });
+    // 덱 드롭다운 이벤트
+    document.getElementById('deckSelect').addEventListener('change', (e) => {
+      currentDeckFilter = e.target.value;
+      currentCategoryFilter = 'all';
+      updateCategoryFilters(currentDeckFilter);
+      renderCardGrid();
     });
 
     // 초기 렌더링
